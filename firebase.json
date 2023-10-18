@@ -5,8 +5,8 @@
   },
   "functions": [
     {
-      "source": "functions",
-      "codebase": "default",
+      "source": "functions/transcribe_video",
+      "codebase": "transcribe-video",
       "ignore": [
         "venv",
         ".git",

@@ -1,2 +1,5 @@
 firebase_functions~=0.1.0
+google-cloud-aiplatform
+google-cloud-speech
 google-cloud-videointelligence
+moviepy

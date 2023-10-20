@@ -103,6 +103,68 @@ def extract_audio(video_full_path, file_name, output_name = None) -> str:
 
   return GS_PATH + gcs_file_path
 
+def build_transcript(response) -> list:
+  """Build video transcript response with transcript metadata.
+
+  Args:
+    response: A transcript response from speech API.
+
+  Return:
+    A list of new video transcript strucutre and metadata.
+    For example,
+    [
+      {
+        "text": "some sentence"
+        "startTime": 0,
+        "endTime": 2.8,
+        "duration": 2.8
+        "words": [
+          {
+            "text": "some"
+            "startTime": 0,
+            "endTime": 1.2,
+            "duration": 1.2
+          },
+          {
+            "text": "sentence"
+            "startTime": 1.2,
+            "endTime": 2.8,
+            "duration": 1.6
+          }
+        ]
+      }
+    ]
+  """
+  transcript_builder = []
+  last_end_time = 0
+  # Each result is for a consecutive portion of the audio. Iterate through
+  # them to get the transcripts for the entire audio file.
+  for result in response.results:
+    # The first alternative is the most likely one for this portion.
+    for alternative in result.alternatives:
+
+      if len(alternative.words) > 0:
+        transcript_item = {
+          "text": alternative.transcript,
+          "startTime": alternative.words[0].start_time.total_seconds(),
+          "endTime": alternative.words[-1].end_time.total_seconds(),
+          "duration": (alternative.words[-1].end_time.total_seconds()
+                      - alternative.words[0].start_time.total_seconds())
+        }
+
+        transcript_item['words'] = []
+        for word in alternative.words:
+          transcript_item['words'].append({
+            "text": word.word,
+            "startTime": word.start_time.total_seconds(),
+            "endTime": word.end_time.total_seconds(),
+            "duration": (word.end_time.total_seconds() 
+                        - word.start_time.total_seconds()),
+            "gap": word.end_time.total_seconds() - last_end_time})
+          last_end_time = word.end_time.total_seconds()
+        transcript_builder.append(transcript_item)
+  return transcript_builder
+
 
 @https_fn.on_call(timeout_sec=600, memory=options.MemoryOption.GB_4, cpu=2,
   region='asia-southeast1')
@@ -125,8 +187,17 @@ def transcribe_video(request: https_fn.CallableRequest) -> any:
   audio = speech.RecognitionAudio(uri=audio_gcs_uri)
   client = speech.SpeechClient()
 
-  #TODO: b/306533157 - Get language model and video transcribe model from
-  # request payload.
+  #TODO: b/306533157 - Get language model and video transcribe model from request payload.
   config = get_speech_recognition_config('en-US', 'video')
 
-  return {'transcript': []}
+  operation = client.long_running_recognize(config=config, audio=audio)
+
+  print("Waiting for operation to complete...")
+  response = operation.result(timeout=900)
+
+  transcript = build_transcript(response)
+
+  return {
+    "transcript": [],
+    "original": transcript
+  }

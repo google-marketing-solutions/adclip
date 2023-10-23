@@ -310,6 +310,15 @@ def refine_by_video_shots(
 
   return new_transcript
 
+def get_transcript(file_name: str) -> bool:
+  """Get transcript from firestore by file name."""
+  db = firestore.client()
+  doc = db.collection('transcripts').document(file_name).get()
+  if not doc.exists:
+      return None
+
+  return doc.to_dict().get('original')
+
 @https_fn.on_call(timeout_sec=600, memory=options.MemoryOption.GB_4, cpu=2,
   region='asia-southeast1')
 def transcribe_video(request: https_fn.CallableRequest) -> any:
@@ -324,6 +333,30 @@ def transcribe_video(request: https_fn.CallableRequest) -> any:
 
   video_full_path = request.data['full_path']
   file_name = request.data['file_name']
+
+  try:
+    language_code = request.data['language_code']
+    model = request.data['model']
+  except:
+    language_code = 'en-US'
+    model = 'video'
+
+  if video_full_path is None:
+    return {
+      'error': 'Missing video uri, sample format: https://googleapis.com/Welcome to World Class.wav'
+    }
+
+  transcript_in_firestore = get_transcript(file_name)
+  if transcript_in_firestore is not None:
+    return {
+      'transcript': merge_clips(
+        refine_by_video_shots(
+          file_name,
+          GS_PATH + video_full_path,
+          transcript_in_firestore)),
+      'original': transcript_in_firestore,
+      'v1': refine_by_gaps(transcript_in_firestore),
+    }
 
   audio_gcs_uri = extract_audio(video_full_path, file_name)
   print(f'Extracted audio is stored at {audio_gcs_uri}')

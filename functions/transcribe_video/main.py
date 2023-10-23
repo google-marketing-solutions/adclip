@@ -23,6 +23,7 @@ GCLOUD_BUCKET_NAME = 'adclip.appspot.com'
 AUDIO_FOLDER = 'videos/audio/'
 TEMP_FOLDER = '/tmp/'
 GS_PATH = f'gs://{GCLOUD_BUCKET_NAME}/'
+GAP_MULTIPLIER = 2.5
 
 storage_client = storage.Client()
 bucket = storage_client.get_bucket(GCLOUD_BUCKET_NAME)
@@ -145,25 +146,56 @@ def build_transcript(response) -> list:
 
       if len(alternative.words) > 0:
         transcript_item = {
-          "text": alternative.transcript,
-          "startTime": alternative.words[0].start_time.total_seconds(),
-          "endTime": alternative.words[-1].end_time.total_seconds(),
-          "duration": (alternative.words[-1].end_time.total_seconds()
+          'text': alternative.transcript,
+          'startTime': alternative.words[0].start_time.total_seconds(),
+          'endTime': alternative.words[-1].end_time.total_seconds(),
+          'duration': (alternative.words[-1].end_time.total_seconds()
                       - alternative.words[0].start_time.total_seconds())
         }
 
         transcript_item['words'] = []
         for word in alternative.words:
           transcript_item['words'].append({
-            "text": word.word,
-            "startTime": word.start_time.total_seconds(),
-            "endTime": word.end_time.total_seconds(),
-            "duration": (word.end_time.total_seconds() 
+            'text': word.word,
+            'startTime': word.start_time.total_seconds(),
+            'endTime': word.end_time.total_seconds(),
+            'duration': (word.end_time.total_seconds()
                         - word.start_time.total_seconds()),
-            "gap": word.end_time.total_seconds() - last_end_time})
+            'gap': word.end_time.total_seconds() - last_end_time})
           last_end_time = word.end_time.total_seconds()
         transcript_builder.append(transcript_item)
   return transcript_builder
+
+def generate_transcript_item(words: list) -> dict:
+  """Generate transcript item."""
+  return {
+    'text': ' '.join(list(map(lambda word: word['text'], words))),
+    'startTime': words[0]['startTime'],
+    'endTime': words[-1]['endTime'],
+    'duration': words[-1]['endTime'] - words[0]['startTime'],
+    'words': words
+  }
+
+def refine_by_gaps(transcript: list) -> list:
+  """Refines the transcript by the gap time."""
+  new_transcript = []
+
+  for line in transcript:
+    gaps = list(map(lambda clip: clip['gap'], line['words']))
+    gaps.pop(0) #remove first gap
+
+    if len(gaps) == 0:
+      continue
+    average = sum(gaps) / len(gaps)
+    words = []
+    for index, word in enumerate(line['words']):
+      if index > 1 and word['gap'] > average * GAP_MULTIPLIER:
+        new_transcript.append(generate_transcript_item(words))
+        words = []
+      words.append(word)
+    if len(words) > 0:
+      new_transcript.append(generate_transcript_item(words))
+  return new_transcript
 
 
 @https_fn.on_call(timeout_sec=600, memory=options.MemoryOption.GB_4, cpu=2,
@@ -198,6 +230,7 @@ def transcribe_video(request: https_fn.CallableRequest) -> any:
   transcript = build_transcript(response)
 
   return {
-    "transcript": [],
-    "original": transcript
+    'transcript': [],
+    'original': transcript,
+    'v1': refine_by_gaps(transcript)
   }

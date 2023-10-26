@@ -1,0 +1,4 @@
+firebase_functions~=0.1.0
+google-cloud-speech
+google-cloud-aiplatform
+moviepy

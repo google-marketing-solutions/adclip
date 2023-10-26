@@ -365,7 +365,7 @@ def transcribe_video(request: https_fn.CallableRequest) -> any:
   client = speech.SpeechClient()
 
   #TODO: b/306533157 - Get language model and video transcribe model from request payload.
-  config = get_speech_recognition_config('en-US', 'video')
+  config = get_speech_recognition_config(language_code, model)
 
   operation = client.long_running_recognize(config=config, audio=audio)
 

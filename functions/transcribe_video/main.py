@@ -13,9 +13,12 @@
 # limitations under the License.
 from google.cloud import speech, storage
 import moviepy.editor as mpy
+import itertools
 
 from firebase_functions import https_fn, options
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, firestore
+
+from video_intelligence import process_video
 
 initialize_app()
 
@@ -24,6 +27,7 @@ AUDIO_FOLDER = 'videos/audio/'
 TEMP_FOLDER = '/tmp/'
 GS_PATH = f'gs://{GCLOUD_BUCKET_NAME}/'
 GAP_MULTIPLIER = 2.5
+MIN_CLIP_DURATION = 5
 
 storage_client = storage.Client()
 bucket = storage_client.get_bucket(GCLOUD_BUCKET_NAME)
@@ -166,13 +170,16 @@ def build_transcript(response) -> list:
         transcript_builder.append(transcript_item)
   return transcript_builder
 
-def generate_transcript_item(words: list) -> dict:
+def generate_transcript_item(
+    words: list, start_time: float = None, end_time: float = None) -> dict:
   """Generate transcript item."""
+  start_time = words[0]['startTime'] if start_time is None else start_time
+  end_time = words[-1]['end_time'] if end_time is None else end_time
   return {
     'text': ' '.join(list(map(lambda word: word['text'], words))),
-    'startTime': words[0]['startTime'],
-    'endTime': words[-1]['endTime'],
-    'duration': words[-1]['endTime'] - words[0]['startTime'],
+    'startTime': start_time,
+    'endTime': end_time,
+    'duration': end_time - start_time,
     'words': words
   }
 
@@ -197,6 +204,111 @@ def refine_by_gaps(transcript: list) -> list:
       new_transcript.append(generate_transcript_item(words))
   return new_transcript
 
+def upload_video_shots(file_name: str, video_shots: list) -> None:
+  """Uploads video shot to firestore."""
+  db = firestore.client()
+  doc_ref = db.collection('video_shots').document(file_name)
+  doc_ref.set({'data': video_shots})
+
+def get_video_shots(file_name: str) -> bool:
+  """Gets video shots from firestore by file name."""
+  db = firestore.client()
+  doc = db.collection('video_shots').document(file_name).get()
+  if not doc.exists:
+    return None
+  return doc.to_dict().get('data')
+
+def merge_clips(transcript: list) -> list:
+  """Merges clips under 5seconds."""
+  if len(transcript) == 0:
+    return []
+
+  def merge(transcript1, transcript2):
+    """Merges transcript1 and transcript2."""
+    start_time = transcript1['startTime']
+    end_time = max(transcript1['endTime'], transcript2['endTime'])
+    return {
+      'text': f"{transcript1['text']} {transcript2['text']}",
+      'startTime': start_time,
+      'endTime': end_time,
+      'duration': end_time - start_time,
+      'words': transcript1['words'] + transcript2['words']
+      }
+
+  def is_overlapping(transcript1, transcript2):
+    """Validate overlapping transcript time."""
+    t2_start_time = transcript2['words'][0]['startTime']
+    t2_prev_start_time = transcript2['words'][-1]['startTime']
+    t1_start_time = transcript1['startTime']
+    t1_end_time = transcript1['endTime']
+    return (t2_start_time >= t1_start_time and
+      t2_prev_start_time <= t1_end_time)
+
+  output = []
+  index = 0
+  clip = transcript[index]
+
+  for index in range(len(transcript)):
+    if index < len(transcript) - 1:
+      next = transcript[index + 1]
+      if (next['endTime'] - clip['startTime'] <= MIN_CLIP_DURATION or
+          is_overlapping(clip, next)):
+        clip = merge(clip, next)
+      else:
+        output.append(clip)
+        clip = transcript[index + 1]
+    else:
+      output.append(clip)
+  return output
+
+def refine_by_video_shots(
+    file_name: str, video_gcs_uri: str, transcript: list) -> list:
+  """Refines transcript with video shots data."""
+
+  new_transcript = []
+  video_shots = get_video_shots(file_name)
+
+  if video_shots is None:
+    video_shots = process_video(video_gcs_uri)
+    upload_video_shots(file_name, video_shots)
+
+  video_shots_index = 0
+  list_of_words = list(map(lambda line: line['words'], transcript))
+  transcript_words = list(itertools.chain.from_iterable(list_of_words))
+  print('\\\\\transcript_words////')
+  print(transcript_words)
+  words = []
+
+  for index, word in enumerate(transcript_words):
+    words.append(word)
+    while video_shots[video_shots_index]['end_time'] < words[0]['startTime']:
+      video_shots_index = video_shots_index + 1
+    video_shot = video_shots[video_shots_index]
+    if word['endTime'] > video_shot['end_time']:
+      start_time = min(words[0]['startTime'], video_shot['start_time'])
+      if index < len(transcript_words) - 1:
+        end_time = max(
+          word['endTime'],
+          min(video_shot['end_time'],
+          transcript_words[index+1]['startTime']))
+      else:
+        end_time = max(word['endTime'], video_shot['end_time'])
+      video_shots_index = video_shots_index + 1
+      new_transcript.append(
+        generate_transcript_item(words, start_time, end_time))
+      words = []
+  if len(words) > 0:
+    start_time = min(
+      words[0]['startTime'],
+      video_shots[video_shots_index]['start_time'])
+    end_time = max(
+      word['endTime'],
+      video_shots[video_shots_index]['end_time'])
+    video_shots_index = video_shots_index + 1
+    new_transcript.append(
+      generate_transcript_item(words, start_time, end_time))
+
+  return new_transcript
 
 @https_fn.on_call(timeout_sec=600, memory=options.MemoryOption.GB_4, cpu=2,
   region='asia-southeast1')
@@ -230,7 +342,11 @@ def transcribe_video(request: https_fn.CallableRequest) -> any:
   transcript = build_transcript(response)
 
   return {
-    'transcript': [],
+    'transcript': merge_clips(
+      refine_by_video_shots(
+        file_name,
+        GS_PATH + video_full_path,
+        transcript)),
     'original': transcript,
     'v1': refine_by_gaps(transcript)
   }

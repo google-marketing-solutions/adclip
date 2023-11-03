@@ -16,18 +16,15 @@
     }
   ],
   "hosting": {
-    "public": "public",
+    "source": "frontend",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+    "frameworksBackend": {
+      "region": "asia-east1"
+    }
   },
   "storage": {
     "rules": "storage.rules"

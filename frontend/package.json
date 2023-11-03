@@ -9,8 +9,9 @@
     "format:fix": "prettier --write --ignore-path .gitignore ."
   },
   "dependencies": {
-    "firebase": "9.1.1",
+    "firebase": "9.1.3",
     "firebase-admin": "9.12.0",
+    "firebaseui": "^6.1.0",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

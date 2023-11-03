@@ -5,6 +5,9 @@
 venv/
 __pycache__/
 
+#firebase
+.firebaserc
+
 # misc
 .DS_Store
 .env.local

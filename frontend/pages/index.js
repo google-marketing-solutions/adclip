@@ -1,20 +1,20 @@
-import { getFirestore, setDoc, doc } from 'firebase/firestore'
-import Head from 'next/head'
-import { useEffect } from 'react'
-import { useUser } from '../context/userContext'
-import styles from './index.module.sass'
+import {getFirestore, setDoc, doc} from 'firebase/firestore';
+import Head from 'next/head';
+import {useEffect} from 'react';
+import {useUser} from '../context/userContext';
+import styles from './index.module.sass';
 
 export default function Home() {
   // Our custom hook to get context values
-  const { loadingUser, user } = useUser()
+  const {loadingUser, user} = useUser();
 
   useEffect(() => {
     if (!loadingUser) {
       // You know that the user is loaded: either logged in or out!
-      console.log(user)
+      console.log(user);
     }
     // You also have your firebase app initialized
-  }, [loadingUser, user])
+  }, [loadingUser, user]);
 
   return (
     <div>
@@ -27,5 +27,5 @@ export default function Home() {
         <h1>AdClip</h1>
       </main>
     </div>
-  )
+  );
 }

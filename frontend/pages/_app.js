@@ -4,6 +4,8 @@ import {useUser} from '../context/userContext';
 import './global.sass';
 import {usePathname, useRouter} from 'next/navigation';
 import Store from '../store/AdClipStore';
+import Header from '../components/Header';
+import styles from './_app.module.sass';
 
 function Layout({children}) {
   const router = useRouter();
@@ -22,7 +24,12 @@ function Layout({children}) {
     }
   }, [pathname, user, router, loadingUser]);
 
-  return children;
+  return (
+    <>
+      <Header />
+      <main className={styles.main}>{children}</main>
+    </>
+  );
 }
 
 // Custom App to wrap it with context provider

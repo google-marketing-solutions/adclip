@@ -4,6 +4,7 @@ import {useEffect, useState} from 'react';
 import {useUser} from '../context/userContext';
 import styles from './index.module.sass';
 import {getVideosFromStorage} from '../fetchData/cloudStorage';
+import Shimmer from '../components/Shimmer';
 import clsx from 'clsx';
 
 const humanFileSize = (bytes) => {
@@ -24,12 +25,15 @@ export default function Home() {
   // Our custom hook to get context values
   const {loadingUser, user} = useUser();
   const [files, setFiles] = useState([]);
+  const [isFetchingFiles, setIsFetchingFiles] = useState(false);
 
   useEffect(() => {
     if (loadingUser || user == null) return;
 
+    setIsFetchingFiles(true);
     getVideosFromStorage().then((newFiles) => {
       setFiles(newFiles);
+      setIsFetchingFiles(false);
     });
   }, [loadingUser, user]);
 
@@ -75,10 +79,23 @@ export default function Home() {
                 {files.map((file) => (
                   <FileRow file={file} key={file.md5Hash} />
                 ))}
-                {files.length === 0 && (
+                {!isFetchingFiles && files.length === 0 && (
                   <tr>
                     <td colSpan="100%">
                       <div style={{paddingLeft: '0.5rem'}}>No files found</div>
+                    </td>
+                  </tr>
+                )}
+                {isFetchingFiles && (
+                  <tr>
+                    <td>
+                      <Shimmer />
+                    </td>
+                    <td>
+                      <Shimmer />
+                    </td>
+                    <td>
+                      <Shimmer />
                     </td>
                   </tr>
                 )}

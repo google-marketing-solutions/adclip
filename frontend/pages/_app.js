@@ -3,6 +3,7 @@ import UserProvider from '../context/userContext';
 import {useUser} from '../context/userContext';
 import './global.sass';
 import {usePathname, useRouter} from 'next/navigation';
+import Store from '../store/AdClipStore';
 
 function Layout({children}) {
   const router = useRouter();
@@ -28,9 +29,11 @@ function Layout({children}) {
 export default function App({Component, pageProps}) {
   return (
     <UserProvider>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <Store.Container>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </Store.Container>
     </UserProvider>
   );
 }

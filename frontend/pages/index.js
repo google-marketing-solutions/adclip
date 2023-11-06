@@ -6,6 +6,7 @@ import styles from './index.module.sass';
 import {getVideosFromStorage} from '../fetchData/cloudStorage';
 import Shimmer from '../components/Shimmer';
 import clsx from 'clsx';
+import Store from '../store/AdClipStore';
 
 const humanFileSize = (bytes) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -22,18 +23,18 @@ const humanFileSize = (bytes) => {
 };
 
 export default function Home() {
-  // Our custom hook to get context values
+  const store = Store.useStore();
   const {loadingUser, user} = useUser();
-  const [files, setFiles] = useState([]);
-  const [isFetchingFiles, setIsFetchingFiles] = useState(false);
+  const files = store.get('files');
+  const isFetchingFiles = store.get('isFetchingFiles');
 
   useEffect(() => {
     if (loadingUser || user == null) return;
 
-    setIsFetchingFiles(true);
+    store.set('isFetchingFiles')(true);
     getVideosFromStorage().then((newFiles) => {
-      setFiles(newFiles);
-      setIsFetchingFiles(false);
+      store.set('files')(newFiles);
+      store.set('isFetchingFiles')(false);
     });
   }, [loadingUser, user]);
 

@@ -7,6 +7,7 @@ import {getVideosFromStorage} from '../fetchData/cloudStorage';
 import Shimmer from '../components/Shimmer';
 import clsx from 'clsx';
 import Store from '../store/AdClipStore';
+import Input from '../components/Input';
 import Button from '../components/Button';
 
 const humanFileSize = (bytes) => {
@@ -28,6 +29,7 @@ export default function Home() {
   const {loadingUser, user} = useUser();
   const files = store.get('files');
   const isFetchingFiles = store.get('isFetchingFiles');
+  const [filenameFilter, setFilenameFilter] = useState('');
   const uploadInputRef = useRef();
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export default function Home() {
   const onChangeFileInput = (event) => {
     store.set('selectedFilesForUpload')(event.target.files);
     store.set('isFetchingFiles')(true);
+    setFilenameFilter('');
   };
 
   const FileRow = ({file}) => {
@@ -65,6 +68,12 @@ export default function Home() {
     );
   };
 
+  const filteredFiles = files
+    .filter((file) =>
+      file.name.toLowerCase().includes(filenameFilter.toLowerCase()),
+    )
+    .sort((a, b) => new Date(b.updated) - new Date(a.updated));
+
   return (
     <div>
       <Head>
@@ -75,6 +84,13 @@ export default function Home() {
       <main>
         <div className={styles.selectContainer}>
           <div className={styles.toolbar}>
+            <Input
+              type="text"
+              className={styles.filenameFilter}
+              placeholder="Search"
+              value={filenameFilter}
+              onChange={setFilenameFilter}
+            />
             <input
               type="file"
               accept="video/*"
@@ -100,13 +116,15 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {files.map((file) => (
+                {filteredFiles.map((file) => (
                   <FileRow file={file} key={file.md5Hash} />
                 ))}
-                {!isFetchingFiles && files.length === 0 && (
+                {!isFetchingFiles && filteredFiles.length === 0 && (
                   <tr>
                     <td colSpan="100%">
-                      <div style={{paddingLeft: '0.5rem'}}>No files found</div>
+                      <div style={{paddingLeft: '0.5rem'}}>
+                        No files found for "{filenameFilter}"
+                      </div>
                     </td>
                   </tr>
                 )}

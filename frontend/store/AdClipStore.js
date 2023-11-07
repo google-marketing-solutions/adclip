@@ -5,6 +5,7 @@ const initialState = {
   files: [],
   isFetchingFiles: false,
   selectedFilesForUpload: [],
+  selectedVideoFullPath: null,
 };
 
 export default createConnectedStore(initialState, effects);

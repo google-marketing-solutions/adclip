@@ -9,6 +9,7 @@ import clsx from 'clsx';
 import Store from '../store/AdClipStore';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import {useRouter} from 'next/navigation';
 
 const humanFileSize = (bytes) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -27,8 +28,10 @@ const humanFileSize = (bytes) => {
 export default function Home() {
   const store = Store.useStore();
   const {loadingUser, user} = useUser();
+  const router = useRouter();
   const files = store.get('files');
   const isFetchingFiles = store.get('isFetchingFiles');
+  const selectedVideoFullPath = store.get('selectedVideoFullPath');
   const [filenameFilter, setFilenameFilter] = useState('');
   const uploadInputRef = useRef();
 
@@ -49,8 +52,16 @@ export default function Home() {
   };
 
   const FileRow = ({file}) => {
+    const isSelected = store.get('selectedVideoFullPath') === file.fullPath;
+    const onClick = () => {
+      store.set('selectedVideoFullPath')(file.fullPath);
+    };
+
     return (
-      <tr className={clsx(styles.fileContainer)} key={file.md5Hash}>
+      <tr
+        className={clsx(styles.fileContainer, isSelected && styles.selected)}
+        key={file.md5Hash}
+        onClick={onClick}>
         <td>{file.name}</td>
         <td>{humanFileSize(file.size)}</td>
         <td>
@@ -68,6 +79,10 @@ export default function Home() {
     );
   };
 
+  const transcribeVideo = () => {
+    router.push('transcribeVideo/' + encodeURIComponent(selectedVideoFullPath));
+  };
+
   const filteredFiles = files
     .filter((file) =>
       file.name.toLowerCase().includes(filenameFilter.toLowerCase()),
@@ -81,7 +96,11 @@ export default function Home() {
         <link rel="icon" href="/adclip.ico" />
       </Head>
 
-      <main>
+      <main className={styles.mainContainer}>
+        <h2>Select a video file</h2>
+        <p>
+          AdClip currently accepts videos with voice-over in English (maximum 2250 words).
+        </p>
         <div className={styles.selectContainer}>
           <div className={styles.toolbar}>
             <Input
@@ -143,6 +162,13 @@ export default function Home() {
                 )}
               </tbody>
             </table>
+          </div>
+          <div className={styles.startButton}>
+            <Button
+              onClick={transcribeVideo}
+              disabled={selectedVideoFullPath == null}>
+              Start
+            </Button>
           </div>
         </div>
       </main>

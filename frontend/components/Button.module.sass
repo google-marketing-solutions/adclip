@@ -1,0 +1,28 @@
+@import '../styles/_colors.sass'
+
+.button
+  background-color: $primaryColor
+  padding: 0.5rem 1rem
+  color: white
+  border-radius: 8px
+  border-width: 0
+  cursor: pointer
+  &:disabled
+    opacity: 0.4
+    cursor: not-allowed
+  &:active
+    background-color: $primaryColorActive
+  &:hover
+    background-color: $primaryColorHover
+
+  &.secondary
+    background-color: white
+    border-color: $primaryColor
+    border-width: 2px
+    color: $primaryColor
+    &:hover
+      opacity: 0.8
+
+.block
+  display: block
+

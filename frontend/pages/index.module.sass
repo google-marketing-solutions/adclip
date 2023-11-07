@@ -1,0 +1,40 @@
+@import '../styles/_colors.sass'
+
+.selectContainer
+  min-width: min(100%, 60rem)
+
+.toolbar
+  text-align: left
+  display: flex
+  justify-content: flex-end
+  align-items: center
+  gap: 0.5rem
+  margin-bottom: 0.5rem
+
+.filesTableContainer
+  max-height: calc(100svh - 320px)
+  overflow-y: auto
+
+.filesTable
+  border: 1px solid $primaryColor2
+  border-radius: 8px
+  width: 100%
+
+  th
+    text-align: left
+    padding-left: 0.5rem
+
+  td
+    text-align: left
+    padding: 0.5rem
+
+.fileContainer
+  border: 1px solid transparent
+  border-bottom-color: #C7C7C7
+  cursor: pointer
+
+  &:hover
+    background: #f0f1f1
+
+  &.selected
+    background: $accentColor2

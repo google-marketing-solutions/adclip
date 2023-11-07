@@ -1,12 +1,13 @@
 import {getFirestore, setDoc, doc} from 'firebase/firestore';
 import Head from 'next/head';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useUser} from '../context/userContext';
 import styles from './index.module.sass';
 import {getVideosFromStorage} from '../fetchData/cloudStorage';
 import Shimmer from '../components/Shimmer';
 import clsx from 'clsx';
 import Store from '../store/AdClipStore';
+import Button from '../components/Button';
 
 const humanFileSize = (bytes) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -27,6 +28,7 @@ export default function Home() {
   const {loadingUser, user} = useUser();
   const files = store.get('files');
   const isFetchingFiles = store.get('isFetchingFiles');
+  const uploadInputRef = useRef();
 
   useEffect(() => {
     if (loadingUser || user == null) return;
@@ -37,6 +39,11 @@ export default function Home() {
       store.set('isFetchingFiles')(false);
     });
   }, [loadingUser, user]);
+
+  const onChangeFileInput = (event) => {
+    store.set('selectedFilesForUpload')(event.target.files);
+    store.set('isFetchingFiles')(true);
+  };
 
   const FileRow = ({file}) => {
     return (
@@ -67,6 +74,22 @@ export default function Home() {
 
       <main>
         <div className={styles.selectContainer}>
+          <div className={styles.toolbar}>
+            <input
+              type="file"
+              accept="video/*"
+              style={{display: 'none'}}
+              ref={uploadInputRef}
+              onChange={onChangeFileInput}
+            />
+            <Button
+              isSecondary
+              onClick={() => {
+                uploadInputRef.current.click();
+              }}>
+              Upload video
+            </Button>
+          </div>
           <div className={styles.filesTableContainer}>
             <table className={styles.filesTable}>
               <thead>

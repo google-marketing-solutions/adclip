@@ -10,3 +10,18 @@ body
 button
   cursor: pointer
 
+.loadingEllipsis:after
+  overflow: hidden
+  display: inline-block
+  vertical-align: bottom
+  animation: ellipsis steps(4,end) 2s infinite
+  content: "..."
+  width: 0
+
+@keyframes ellipsis
+  to
+    width: 1.25em
+
+@-webkit-keyframes ellipsis
+  to
+    width: 1.25em

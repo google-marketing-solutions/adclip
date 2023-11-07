@@ -1,0 +1,45 @@
+@import '../styles/_colors.sass'
+
+.transcriptRow
+  margin-bottom: 1rem
+  gap: 0.5rem
+
+  display: grid
+  grid-template-columns: 3rem 3rem 1fr
+  align-items: start
+
+  // change lengths of text shimmer under transcriptRow
+  &:nth-child(4n)
+    .textShimmer:nth-child(3)
+      width: 50%
+  &:nth-child(4n-1)
+    .textShimmer:nth-child(3)
+      width: 80%
+  &:nth-child(4n-2)
+    .textShimmer:nth-child(3)
+      width: 60%
+
+.wrapper
+  width: 100%
+  animation: fullView 0.5s forwards cubic-bezier(0.250, 0.460, 0.450, 0.940)
+
+@keyframes fullView
+  100%
+    width: 100%
+
+.textShimmer
+  width: 100%
+  height: 1.5rem
+  border-radius: 8px
+
+.animate
+  animation: shimmer 2s infinite
+  background: linear-gradient(to right, #eff1f3 4%, #e2e2e2 25%, #eff1f3 36%)
+  background-size: 1000px 100%
+
+@keyframes shimmer
+  0%
+    background-position: -1000px 0
+  100%
+    background-position: 1000px 0
+

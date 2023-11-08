@@ -1,5 +1,4 @@
 import {getFirestore, setDoc, doc} from 'firebase/firestore';
-import Head from 'next/head';
 import {useEffect, useRef, useState} from 'react';
 import {useUser} from '../context/userContext';
 import styles from './index.module.sass';
@@ -91,11 +90,6 @@ export default function Home() {
 
   return (
     <div>
-      <Head>
-        <title>AdClip</title>
-        <link rel="icon" href="/adclip.ico" />
-      </Head>
-
       <main className={styles.mainContainer}>
         <h2>Select a video file</h2>
         <p>

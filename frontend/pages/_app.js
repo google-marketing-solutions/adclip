@@ -1,4 +1,5 @@
 import {useEffect} from 'react';
+import Head from 'next/head';
 import UserProvider from '../context/userContext';
 import {useUser} from '../context/userContext';
 import '../styles/global.sass';
@@ -26,6 +27,11 @@ function Layout({children}) {
 
   return (
     <>
+      <Head>
+        <title>AdClip</title>
+        <link rel="icon" href="/adclip.ico" />
+      </Head>
+
       <Header />
       <main className={styles.main}>{children}</main>
     </>

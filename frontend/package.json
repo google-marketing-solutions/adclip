@@ -14,6 +14,7 @@
     "firebase-admin": "9.12.0",
     "firebaseui": "^6.1.0",
     "next": "latest",
+    "rc-slider": "^10.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "undux": "^5.2.0",

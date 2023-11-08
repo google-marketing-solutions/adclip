@@ -6,6 +6,8 @@ const initialState = {
   isFetchingFiles: false,
   isGettingOriginalVideoUrl: false,
   isTranscribingVideo: false,
+  maxDuration: 40,
+  minDuration: 20,
   reviewTranscripts: [],
   reviewVideo: '',
   selectedFilesForUpload: [],

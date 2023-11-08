@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
 import UserProvider from '../context/userContext';
 import {useUser} from '../context/userContext';
-import './global.sass';
+import '../styles/global.sass';
 import {usePathname, useRouter} from 'next/navigation';
 import Store from '../store/AdClipStore';
 import Header from '../components/Header';

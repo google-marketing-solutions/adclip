@@ -1,3 +1,4 @@
+import {useRef} from 'react';
 import styles from './index.module.sass';
 import {useRouter} from 'next/router';
 import TranscriptsContainer from './TranscriptsContainer';
@@ -10,6 +11,7 @@ function TranscriptReview() {
   const router = useRouter();
   const videoFullPath = router.query.videoFullPath;
   const isTranscribingVideo = store.get('isTranscribingVideo');
+  const playerRef = useRef(null);
 
   return (
     <div className={styles.transcriptReviewContainer}>
@@ -21,12 +23,12 @@ function TranscriptReview() {
       </p>
       <main>
         <div>
-          <TranscriptsContainer />
+          <TranscriptsContainer playerRef={playerRef} />
           <br />
         </div>
         <div>
           <p>Video Reference</p>
-          <VideoReference />
+          <VideoReference ref={playerRef} />
           <div className={styles.nextButtonContainer}>
             <DurationInput
               disabled={isTranscribingVideo}

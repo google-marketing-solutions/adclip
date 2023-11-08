@@ -4,7 +4,7 @@ import Button from '../../components/Button';
 import clsx from 'clsx';
 import TranscriptRow from '../../components/TranscriptRow';
 
-function TranscriptsContainer() {
+function TranscriptsContainer({playerRef}) {
   const store = Store.useStore();
   const transcripts = store.get('reviewTranscripts');
   const isTranscribingVideo = store.get('isTranscribingVideo');
@@ -27,6 +27,7 @@ function TranscriptsContainer() {
               isLoading={isTranscribingVideo}
               index={index}
               key={transcript.text}
+              playerRef={playerRef}
               transcript={transcript}
               transcriptKey="reviewTranscripts"
             />

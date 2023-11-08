@@ -1,16 +1,15 @@
 import 'video-react/dist/video-react.css'; // import css
 import {BigPlayButton, Player} from 'video-react';
-import {useEffect, useRef} from 'react';
+import {forwardRef, useEffect} from 'react';
 import Store from '../store/AdClipStore';
 import usePrevious from '../hooks/usePrevious';
 import VideoPlayerShimmer from './VideoPlayerShimmer';
 
-function VideoReference(props) {
+const VideoReference = forwardRef(function VideoReference(props, playerRef) {
   const store = Store.useStore();
   const isGettingOriginalVideoUrl = store.get('isGettingOriginalVideoUrl');
   const source = store.get('reviewVideo');
   const previousSource = usePrevious(source);
-  const playerRef = useRef();
 
   useEffect(() => {
     if (previousSource !== source && playerRef.current != null) {
@@ -30,6 +29,6 @@ function VideoReference(props) {
       )}
     </div>
   );
-}
+});
 
 export default VideoReference;

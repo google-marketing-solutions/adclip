@@ -6,6 +6,7 @@ const initialState = {
   isFetchingFiles: false,
   isGettingOriginalVideoUrl: false,
   isTranscribingVideo: false,
+  isTranscriptInEdit: false,
   maxDuration: 40,
   minDuration: 20,
   reviewTranscripts: [],

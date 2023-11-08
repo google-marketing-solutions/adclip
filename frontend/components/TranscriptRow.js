@@ -1,9 +1,29 @@
+import {useState} from 'react';
+import {useDebouncedCallback} from 'use-debounce';
 import Store from '../store/AdClipStore';
 import styles from './TranscriptRow.module.sass';
 import clsx from 'clsx';
 
-function TranscriptText({transcript}) {
-  return <span className={styles.transcriptText}>{transcript}</span>;
+function TranscriptText({index, transcript}) {
+  const store = Store.useStore();
+  const [content, setContent] = useState(transcript);
+  const isTranscriptInEdit = store.get('isTranscriptInEdit');
+
+  const debouncedUpdateTranscripts = useDebouncedCallback((value) => {
+    const transcripts = store.get('reviewTranscripts');
+    transcripts[index].text = value;
+    store.set('reviewTranscripts')(transcripts);
+  }, 1000);
+  const changeValue = (event) => {
+    setContent(event.target.value);
+    debouncedUpdateTranscripts(event.target.value);
+  };
+
+  return isTranscriptInEdit ? (
+    <input onChange={changeValue} type="text" value={content} />
+  ) : (
+    <span className={styles.transcriptText}>{content}</span>
+  );
 }
 
 function TimestampButton({index, objectKey, playerRef, transcriptKey}) {
@@ -49,7 +69,7 @@ function TranscriptRow({
         playerRef={playerRef}
         transcriptKey={transcriptKey}
       />
-      <TranscriptText transcript={transcript.text} />
+      <TranscriptText index={index} transcript={transcript.text} />
     </div>
   );
 }

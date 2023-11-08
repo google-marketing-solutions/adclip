@@ -4,6 +4,7 @@ import effects from './AdClipEffects';
 const initialState = {
   files: [],
   isFetchingFiles: false,
+  isGettingOriginalVideoUrl: false,
   isTranscribingVideo: false,
   reviewTranscripts: [],
   reviewVideo: '',

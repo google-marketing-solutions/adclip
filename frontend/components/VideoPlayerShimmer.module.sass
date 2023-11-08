@@ -1,0 +1,55 @@
+.card
+  border: 2px solid #fff
+  box-shadow:0px 0px 10px 0 #a9a9a9
+  padding: 30px 40px
+  margin: 2rem
+  position: relative
+  aspect-ratio: 16 / 9
+  border-radius: 8px
+
+  &.vertical
+    aspect-ratio: 9 / 16
+
+.wrapper
+  width: 100%
+  height: 100%
+  animation: fullView 0.5s forwards cubic-bezier(0.250, 0.460, 0.450, 0.940)
+  position: relative
+  display: flex
+  align-items: flex-end
+
+.playButtonContainer
+  position: absolute
+  width: 100%
+  height: 100%
+  display: flex
+  justify-content: center
+  align-items: center
+
+.playButton
+  width: 65px
+  height: 65px
+  background: #777
+  clip-path: polygon(0% 0%, 0% 100%, 85% 50%)
+
+.controls
+  height: 10px
+  width: 100%
+  background: #777
+  border-radius: 8px
+
+.animate
+  animation: shimmer 2s infinite
+  background: linear-gradient(to right, #eff1f3 4%, #e2e2e2 25%, #eff1f3 36%)
+  background-size: 1000px 100%
+
+@keyframes fullView
+  100%
+    width: 100%
+
+@keyframes shimmer
+  0%
+    background-position: -1000px 0
+  100%
+    background-position: 1000px 0
+

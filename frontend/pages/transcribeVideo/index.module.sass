@@ -1,2 +1,15 @@
 .transcriptReviewContainer
   width: min(100%, 95rem)
+
+  main
+    width: 100%
+    display: grid
+
+    > div
+      padding: 1rem
+
+      p:first-child
+        margin-top: 0
+
+    @media (min-width: 50em)
+      grid-template-columns: 2fr 1fr

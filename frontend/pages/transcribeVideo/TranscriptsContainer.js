@@ -13,7 +13,7 @@ function TranscriptsContainer() {
     <div className={styles.transcriptsContainer}>
       {isTranscribingVideo ? (
         <p className="loadingEllipsis">The video is being transcribed</p>
-      ): (
+      ) : (
         <div className={clsx(styles.header, styles.transcriptRow)}>
           <span>Start</span>
           <span>End</span>

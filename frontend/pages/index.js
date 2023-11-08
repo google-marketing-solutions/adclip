@@ -99,7 +99,8 @@ export default function Home() {
       <main className={styles.mainContainer}>
         <h2>Select a video file</h2>
         <p>
-          AdClip currently accepts videos with voice-over in English (maximum 2250 words).
+          AdClip currently accepts videos with voice-over in English (maximum
+          2250 words).
         </p>
         <div className={styles.selectContainer}>
           <div className={styles.toolbar}>

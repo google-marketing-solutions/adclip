@@ -1,6 +1,7 @@
 import styles from './index.module.sass';
 import {useRouter} from 'next/router';
 import TranscriptsContainer from './TranscriptsContainer';
+import VideoReference from '../../components/VideoReference';
 
 function TranscriptReview() {
   const router = useRouter();
@@ -15,8 +16,14 @@ function TranscriptReview() {
         accuracy.
       </p>
       <main>
-        <TranscriptsContainer />
-        <br />
+        <div>
+          <TranscriptsContainer />
+          <br />
+        </div>
+        <div>
+          <p>Video Reference</p>
+          <VideoReference />
+        </div>
       </main>
     </div>
   );

@@ -33,3 +33,9 @@ export const getVideosFromStorage = async () => {
   const files = await getFilesFromStorage();
   return files.filter((file) => file.contentType.includes('video'));
 };
+
+export const getFilenameFromFullPath = (fullPath) => {
+  if (fullPath == null) return null;
+  const filePathArr = fullPath.split('/');
+  return filePathArr[filePathArr.length - 1];
+};

@@ -6,18 +6,14 @@ import TranscriptsContainer from './TranscriptsContainer';
 import VideoReference from '../../components/VideoReference';
 import DurationInput from '../../components/DurationInput';
 import Store from '../../store/AdClipStore';
-
-const getFilenameFromFullPath = (fullPath) => {
-  if (fullPath == null) return null;
-  const filePathArr = fullPath.split('/');
-  return filePathArr[filePathArr.length - 1];
-};
+import {getFilenameFromFullPath} from '../../fetchData/cloudStorage';
 
 function TranscriptReview() {
   const store = Store.useStore();
   const router = useRouter();
   const videoFullPath = router.query.videoFullPath;
   const isTranscribingVideo = store.get('isTranscribingVideo');
+  const transcriptionError = store.get('transcriptionError');
   const playerRef = useRef(null);
 
   const filename = getFilenameFromFullPath(videoFullPath);
@@ -37,8 +33,22 @@ function TranscriptReview() {
         </p>
         <main>
           <div>
-            <TranscriptsContainer playerRef={playerRef} />
-            <br />
+            {transcriptionError != null ? (
+              <div className={styles.error}>
+                Transcription failed.
+                <p>
+                  <em>{transcriptionError.name}</em>
+                </p>
+                <p>
+                  <em>{transcriptionError.cause}</em>
+                </p>
+                <p>
+                  <em>{transcriptionError.message}</em>
+                </p>
+              </div>
+            ) : (
+              <TranscriptsContainer playerRef={playerRef} />
+            )}
           </div>
           <div>
             <p>Video Reference</p>

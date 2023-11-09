@@ -2,7 +2,10 @@ import {getFirestore, setDoc, doc} from 'firebase/firestore';
 import {useEffect, useRef, useState} from 'react';
 import {useUser} from '../context/userContext';
 import styles from './index.module.sass';
-import {getVideosFromStorage} from '../fetchData/cloudStorage';
+import {
+  getFilenameFromFullPath,
+  getVideosFromStorage,
+} from '../fetchData/cloudStorage';
 import Shimmer from '../components/Shimmer';
 import clsx from 'clsx';
 import Store from '../store/AdClipStore';
@@ -79,6 +82,9 @@ export default function Home() {
   };
 
   const transcribeVideo = () => {
+    store.set('isTranscribingVideo')(true);
+    store.set('isGettingOriginalVideoUrl')(true);
+    store.set('transcriptionError')(null);
     router.push('transcribeVideo/' + encodeURIComponent(selectedVideoFullPath));
   };
 

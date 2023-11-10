@@ -143,7 +143,7 @@ export default function Home() {
                   <tr>
                     <td colSpan="100%">
                       <div style={{paddingLeft: '0.5rem'}}>
-                        No files found for "{filenameFilter}"
+                        No files found for &quot;{filenameFilter}&quot;
                       </div>
                     </td>
                   </tr>

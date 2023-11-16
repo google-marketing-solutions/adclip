@@ -5,6 +5,7 @@ const initialState = {
   files: [],
   isFetchingFiles: false,
   isGettingOriginalVideoUrl: false,
+  isSummarizingTranscript: false,
   isTranscribingVideo: false,
   isTranscriptInEdit: false,
   maxDuration: 40,
@@ -13,6 +14,7 @@ const initialState = {
   reviewVideo: '',
   selectedFilesForUpload: [],
   selectedVideoFullPath: null,
+  summarizedTranscripts: [],
   transcriptionError: null,
 };
 

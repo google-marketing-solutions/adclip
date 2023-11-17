@@ -11,6 +11,7 @@ import Button from '../../components/Button';
 
 function SummaryReview() {
   const store = Store.useStore();
+  const areTimestampsInEdit = store.get('areTimestampsInEdit');
   const isSummarizingTranscript = store.get('isSummarizingTranscript');
   const transcripts = store.get('summarizedTranscripts');
   const router = useRouter();
@@ -33,6 +34,7 @@ function SummaryReview() {
 
   const togglePreview = () => {
     if (isPreviewing) setPreviewCurrentTime(-1);
+    else store.set('areTimestampsInEdit')(false);
     setIsPreviewing(!isPreviewing);
   };
 
@@ -58,6 +60,16 @@ function SummaryReview() {
             ) : (
               <>
                 <div className={styles.editButtons}>
+                  {!isPreviewing && (
+                    <Button
+                      isSecondary
+                      disabled={isSummarizingTranscript}
+                      onClick={() => {
+                        store.set('areTimestampsInEdit')(!areTimestampsInEdit);
+                      }}>
+                      {!areTimestampsInEdit ? 'Adjust Timestamps' : 'Save'}
+                    </Button>
+                  )}
                   <Button
                     isSecondary
                     disabled={isSummarizingTranscript}

@@ -2,6 +2,7 @@ import {createConnectedStore} from 'undux';
 import effects from './AdClipEffects';
 
 const initialState = {
+  areTimestampsInEdit: false,
   files: [],
   isFetchingFiles: false,
   isGettingOriginalVideoUrl: false,

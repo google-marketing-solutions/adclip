@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {useDebouncedCallback} from 'use-debounce';
 import Store from '../store/AdClipStore';
 import styles from './TranscriptRow.module.sass';
+import Input from './Input';
 import clsx from 'clsx';
 
 function TranscriptText({index, isHighlighted = false, transcript}) {
@@ -28,8 +29,28 @@ function TranscriptText({index, isHighlighted = false, transcript}) {
 
 function TimestampButton({index, objectKey, playerRef, transcriptKey}) {
   const store = Store.useStore();
+  const areTimestampsInEdit = store.get('areTimestampsInEdit');
   const transcripts = store.get(transcriptKey);
   const time = transcripts[index][objectKey];
+
+  const onChange = (value) => {
+    transcripts[index][objectKey] = Number(value);
+    transcripts[index].duration =
+      transcripts[index].endTime - transcripts[index].startTime;
+    store.set('summarizedTranscripts')(transcripts);
+  };
+  if (areTimestampsInEdit) {
+    return (
+      <Input
+        onChange={onChange}
+        onEnter={() => {
+          store.set('areTimestampsInEdit')(false);
+        }}
+        type="number"
+        value={time}
+      />
+    );
+  }
 
   const changePlayerTime = () => {
     playerRef.current.seek(time);

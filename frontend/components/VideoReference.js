@@ -6,7 +6,12 @@ import usePrevious from '../hooks/usePrevious';
 import VideoPlayerShimmer from './VideoPlayerShimmer';
 
 const VideoReference = forwardRef(function VideoReference(
-  {hasControls = true, isAutoplay = false, transcripts = []},
+  {
+    hasControls = true,
+    isAutoplay = false,
+    onTimeUpdateCallback = null,
+    transcripts = [],
+  },
   playerRef,
 ) {
   const store = Store.useStore();
@@ -28,6 +33,7 @@ const VideoReference = forwardRef(function VideoReference(
 
   const onTimeUpdate = (event) => {
     const {currentTime} = event.target;
+    if (onTimeUpdateCallback != null) onTimeUpdateCallback(currentTime);
 
     if (transcripts != null && transcripts.length > 0) {
       let shouldPause = true;

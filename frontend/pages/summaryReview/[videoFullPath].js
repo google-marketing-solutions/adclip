@@ -16,6 +16,7 @@ function SummaryReview() {
   const router = useRouter();
   const videoFullPath = router.query.videoFullPath;
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewCurrentTime, setPreviewCurrentTime] = useState(-1);
   const playerRef = useRef(null);
 
   const filename = getFilenameFromFullPath(videoFullPath);
@@ -26,7 +27,12 @@ function SummaryReview() {
     0,
   );
 
+  const onPreviewTimeUpdate = (currentTime) => {
+    setPreviewCurrentTime(currentTime);
+  };
+
   const togglePreview = () => {
+    if (isPreviewing) setPreviewCurrentTime(-1);
     setIsPreviewing(!isPreviewing);
   };
 
@@ -71,6 +77,10 @@ function SummaryReview() {
               : transcripts
             ).map((transcript, index) => (
               <TranscriptRow
+                isHighlighted={
+                  transcript.startTime <= previewCurrentTime &&
+                  transcript.endTime > previewCurrentTime
+                }
                 isLoading={isSummarizingTranscript}
                 index={index}
                 key={transcript.text}
@@ -88,6 +98,7 @@ function SummaryReview() {
                 <VideoReference
                   hasControls={false}
                   isAutoplay
+                  onTimeUpdateCallback={onPreviewTimeUpdate}
                   ref={playerRef}
                   transcripts={transcripts}
                 />

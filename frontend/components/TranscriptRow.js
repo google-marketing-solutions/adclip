@@ -4,7 +4,7 @@ import Store from '../store/AdClipStore';
 import styles from './TranscriptRow.module.sass';
 import clsx from 'clsx';
 
-function TranscriptText({index, transcript}) {
+function TranscriptText({index, isHighlighted = false, transcript}) {
   const store = Store.useStore();
   const [content, setContent] = useState(transcript);
   const isTranscriptInEdit = store.get('isTranscriptInEdit');
@@ -22,7 +22,7 @@ function TranscriptText({index, transcript}) {
   return isTranscriptInEdit ? (
     <input onChange={changeValue} type="text" value={content} />
   ) : (
-    <span className={styles.transcriptText}>{content}</span>
+    <span className={clsx(isHighlighted && styles.highlighted)}>{content}</span>
   );
 }
 
@@ -40,6 +40,7 @@ function TimestampButton({index, objectKey, playerRef, transcriptKey}) {
 
 function TranscriptRow({
   index,
+  isHighlighted = false,
   isLoading,
   playerRef,
   transcriptKey,
@@ -69,7 +70,11 @@ function TranscriptRow({
         playerRef={playerRef}
         transcriptKey={transcriptKey}
       />
-      <TranscriptText index={index} transcript={transcript.text} />
+      <TranscriptText
+        index={index}
+        isHighlighted={isHighlighted}
+        transcript={transcript.text}
+      />
     </div>
   );
 }

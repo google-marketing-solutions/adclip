@@ -29,7 +29,9 @@ function SummaryReview() {
     0,
   );
 
-  const generateVideos = () => {}
+  const generateVideos = () => {
+    router.push('/outputVideos/' + encodeURIComponent(videoFullPath));
+  };
 
   const onPreviewTimeUpdate = (currentTime) => {
     setPreviewCurrentTime(currentTime);

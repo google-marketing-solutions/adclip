@@ -5,6 +5,7 @@ const initialState = {
   areTimestampsInEdit: false,
   files: [],
   isFetchingFiles: false,
+  isGeneratingVideos: false,
   isGettingOriginalVideoUrl: false,
   isSummarizingTranscript: false,
   isTranscribingVideo: false,

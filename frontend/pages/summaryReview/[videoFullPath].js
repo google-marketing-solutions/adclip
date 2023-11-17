@@ -30,6 +30,7 @@ function SummaryReview() {
   );
 
   const generateVideos = () => {
+    store.set('isGeneratingVideos')(true);
     router.push('/outputVideos/' + encodeURIComponent(videoFullPath));
   };
 

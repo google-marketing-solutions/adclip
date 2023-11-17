@@ -24,7 +24,7 @@ function OutputVideos() {
         <div className="loadingEllipsis">Generating video</div>
       )}
       <div style={{width: '480px'}}>
-        <Video isLoading={isGeneratingVideos} />
+        <Video isLoading={isGeneratingVideos} name={filename} />
       </div>
     </>
   );

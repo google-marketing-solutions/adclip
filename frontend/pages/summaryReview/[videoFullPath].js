@@ -29,6 +29,8 @@ function SummaryReview() {
     0,
   );
 
+  const generateVideos = () => {}
+
   const onPreviewTimeUpdate = (currentTime) => {
     setPreviewCurrentTime(currentTime);
   };
@@ -125,7 +127,14 @@ function SummaryReview() {
             )}
           </section>
         </main>
-        <div>
+        <div className={styles.buttonSectionsContainer}>
+          <section>
+            <p>Looks good?</p>
+            <Button onClick={generateVideos} disabled={isSummarizingTranscript}>
+              Generate Video
+            </Button>
+          </section>
+          <div className={styles.divider} />
           <section>
             <DurationInput
               disabled={isSummarizingTranscript}

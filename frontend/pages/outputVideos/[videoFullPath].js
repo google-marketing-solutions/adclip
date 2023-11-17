@@ -2,6 +2,7 @@ import Head from 'next/head';
 import {useRouter} from 'next/router';
 import {getFilenameFromFullPath} from '../../fetchData/cloudStorage';
 import Store from '../../store/AdClipStore';
+import Button from '../../components/Button';
 import Video from '../../components/Video';
 
 function OutputVideos() {
@@ -11,6 +12,10 @@ function OutputVideos() {
   const isGeneratingVideos = store.get('isGeneratingVideos');
 
   const filename = getFilenameFromFullPath(videoFullPath);
+
+  const goToHomePage = () => {
+    router.push('/');
+  };
 
   return (
     <>
@@ -23,8 +28,13 @@ function OutputVideos() {
       {isGeneratingVideos && (
         <div className="loadingEllipsis">Generating video</div>
       )}
+
       <div style={{width: '480px'}}>
         <Video isLoading={isGeneratingVideos} name={filename} />
+      </div>
+
+      <div style={{marginTop: '2rem'}}>
+        <Button onClick={goToHomePage}>Start Over</Button>
       </div>
     </>
   );

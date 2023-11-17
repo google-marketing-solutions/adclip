@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import TranscriptRow from '../../components/TranscriptRow';
 import VideoReference from '../../components/VideoReference';
 import Button from '../../components/Button';
+import DurationInput from '../../components/DurationInput';
 
 function SummaryReview() {
   const store = Store.useStore();
@@ -30,6 +31,10 @@ function SummaryReview() {
 
   const onPreviewTimeUpdate = (currentTime) => {
     setPreviewCurrentTime(currentTime);
+  };
+
+  const resummarize = () => {
+    store.set('isSummarizingTranscript')(true);
   };
 
   const togglePreview = () => {
@@ -120,6 +125,17 @@ function SummaryReview() {
             )}
           </section>
         </main>
+        <div>
+          <section>
+            <DurationInput
+              disabled={isSummarizingTranscript}
+              onSubmit={resummarize}
+              submitText="Resummarize"
+              isSecondary
+              isCompact
+            />
+          </section>
+        </div>
       </div>
     </>
   );

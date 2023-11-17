@@ -4,6 +4,7 @@ import Store from '../store/AdClipStore';
 import Input from './Input';
 import Button from './Button';
 import Slider from 'rc-slider';
+import clsx from 'clsx';
 
 const DEFAULT_MAX_DURATION = 40;
 const DEFAULT_MIN_DURATION = 20;
@@ -11,7 +12,17 @@ const MIN_DURATION = 10;
 const MIN_DURATION_GAP = 10;
 const SLIDER_STEP = 5;
 
-function DurationInput({disabled, onSubmit, submitText}) {
+/**
+ * Component that allows user to input the expected minimum and maximum duration
+ * for the output video.
+ */
+function DurationInput({
+  disabled,
+  isCompact = false,
+  isSecondary = false,
+  onSubmit,
+  submitText,
+}) {
   const store = Store.useStore();
   const minDuration = store.get('minDuration');
   const maxDuration = store.get('maxDuration');
@@ -23,8 +34,12 @@ function DurationInput({disabled, onSubmit, submitText}) {
   };
 
   return (
-    <div>
-      <div className={styles.summarizeActionInputs}>
+    <div className={clsx(isCompact && styles.summarizeActionContainer)}>
+      <div
+        className={clsx(
+          isCompact && styles.compact,
+          styles.summarizeActionInputs,
+        )}>
         <label>Output Duration (in seconds)</label>
         <Slider
           className={styles.slider}
@@ -59,7 +74,7 @@ function DurationInput({disabled, onSubmit, submitText}) {
           />
         </div>
       </div>
-      <Button disabled={disabled} onClick={onSubmit}>
+      <Button disabled={disabled} isSecondary={isSecondary} onClick={onSubmit}>
         {submitText}
       </Button>
     </div>

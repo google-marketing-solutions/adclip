@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import {getFilenameFromFullPath} from '../../fetchData/cloudStorage';
 import Store from '../../store/AdClipStore';
@@ -8,10 +9,9 @@ import Video from '../../components/Video';
 function OutputVideos() {
   const store = Store.useStore();
   const router = useRouter();
-  const videoFullPath = router.query.videoFullPath;
   const isGeneratingVideos = store.get('isGeneratingVideos');
-
-  const filename = getFilenameFromFullPath(videoFullPath);
+  const filename = store.get('inputVideoFilename');
+  const title = `${filename != null && filename + ' | '}Output Videos`;
 
   const goToHomePage = () => {
     router.push('/');
@@ -20,7 +20,7 @@ function OutputVideos() {
   return (
     <>
       <Head>
-        <title>{filename}</title>
+        <title>{title}</title>
       </Head>
 
       <h2>Output Videos</h2>

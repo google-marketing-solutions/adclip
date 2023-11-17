@@ -1,4 +1,4 @@
-import {useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import styles from './index.module.sass';
 import Head from 'next/head';
 import {useRouter} from 'next/router';
@@ -15,13 +15,13 @@ function TranscriptReview() {
   const isTranscribingVideo = store.get('isTranscribingVideo');
   const transcriptionError = store.get('transcriptionError');
   const playerRef = useRef(null);
+  const filename = store.get('inputVideoFilename');
 
-  const filename = getFilenameFromFullPath(videoFullPath);
-
+  const title = `${filename != null && filename + ' | '}Transcript Review`;
   return (
     <>
       <Head>
-        <title>{filename}</title>
+        <title>{title}</title>
       </Head>
 
       <div className={styles.transcriptReviewContainer}>

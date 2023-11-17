@@ -1,4 +1,4 @@
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import styles from './index.module.sass';
 import Store from '../../store/AdClipStore';
 import Head from 'next/head';
@@ -15,13 +15,12 @@ function SummaryReview() {
   const areTimestampsInEdit = store.get('areTimestampsInEdit');
   const isSummarizingTranscript = store.get('isSummarizingTranscript');
   const transcripts = store.get('summarizedTranscripts');
+  const filename = store.get('inputVideoFilename');
   const router = useRouter();
-  const videoFullPath = router.query.videoFullPath;
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewCurrentTime, setPreviewCurrentTime] = useState(-1);
   const playerRef = useRef(null);
-
-  const filename = getFilenameFromFullPath(videoFullPath);
+  const title = `${filename != null && filename + ' | '}Summary Review`;
 
   const totalDuration = transcripts.reduce(
     (duration, transcript) =>
@@ -31,7 +30,9 @@ function SummaryReview() {
 
   const generateVideos = () => {
     store.set('isGeneratingVideos')(true);
-    router.push('/outputVideos/' + encodeURIComponent(videoFullPath));
+    router.push(
+      '/outputVideos/' + encodeURIComponent(store.get('inputVideoFullPath')),
+    );
   };
 
   const onPreviewTimeUpdate = (currentTime) => {
@@ -51,7 +52,7 @@ function SummaryReview() {
   return (
     <>
       <Head>
-        <title>{filename}</title>
+        <title>{title}</title>
       </Head>
 
       <div className={styles.pageContainer}>

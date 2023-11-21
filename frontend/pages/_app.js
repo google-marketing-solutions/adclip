@@ -7,6 +7,7 @@ import {useRouter} from 'next/router';
 import {usePathname} from 'next/navigation';
 import Store from '../store/AdClipStore';
 import Header from '../components/Header';
+import NavigationBar from '../components/NavigationBar';
 import styles from './_app.module.sass';
 
 function Layout({children}) {
@@ -41,7 +42,10 @@ function Layout({children}) {
       </Head>
 
       <Header />
-      <main className={styles.main}>{children}</main>
+      <main className={styles.main}>
+        <NavigationBar />
+        {children}
+      </main>
     </>
   );
 }

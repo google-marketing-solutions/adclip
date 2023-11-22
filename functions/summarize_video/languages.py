@@ -75,45 +75,52 @@ class DefaultLanguage(Language):
     words = super()._extract_words_from_str(shortened_text)
 
     word_ptr = 0
-    while word_ptr < len(words) and transcript_ptr < len(transcript):
+
+    def does_word_match_transcript(transcript_idx: int, word_idx: int):
+      if transcript_idx >= len(transcript) or word_idx >= len(words):
+        return False
+
+      return (transcript[transcript_idx].get('text').lower() ==
+              words[word_idx].lower())
+
+    while word_ptr < len(words) or transcript_ptr < len(transcript):
       transcript_builder = []
 
-      while (transcript_ptr < len(transcript) and
-      word_ptr < len(words) and
-      transcript[transcript_ptr].get(self._SHOULD_KEEP) != True and
-      transcript[transcript_ptr].get(self._TEXT).lower() != words[word_ptr]):
+      # loop until the summary word match with transcript
+      # or until the transcript has True shouldKeep flag
+      while (transcript_ptr < len(transcript)
+             and not does_word_match_transcript(transcript_ptr, word_ptr)
+             and transcript[transcript_ptr].get('shouldKeep') != True):
         transcript_ptr = transcript_ptr + 1
 
-      while ((transcript_ptr < len(transcript) and
-      word_ptr < len(words) and (
-        transcript[transcript_ptr].get(self._SHOULD_KEEP) == True or
-        transcript[transcript_ptr].get(self._TEXT).lower() == words[word_ptr]
-      ))
-
-      or (transcript_ptr < len(transcript) - 1 and
-      word_ptr < len(words) - 1 and
-      transcript[transcript_ptr+1].get(self._TEXT).lower() == words[word_ptr+1])
-      or (transcript_ptr < len(transcript) - 2 and
-      word_ptr < len(words) - 1 and
-      transcript[transcript_ptr+2].get(self._TEXT).lower() == words[word_ptr+1])):
+      # append all matched transcript summary
+      # or transcript that has True shouldKeep flag
+      while (transcript_ptr < len(transcript)
+             and (does_word_match_transcript(transcript_ptr, word_ptr)
+                  or does_word_match_transcript(transcript_ptr + 1, word_ptr + 1)
+                  or does_word_match_transcript(transcript_ptr + 2, word_ptr + 1)
+                  or transcript[transcript_ptr].get('shouldKeep') == True)):
         transcript_builder.append(transcript[transcript_ptr])
-        if (transcript[transcript_ptr].get(self._SHOULD_KEEP) != True and
-        transcript[transcript_ptr].get(self._TEXT).lower() != words[word_ptr]):
+
+        if does_word_match_transcript(transcript_ptr, word_ptr):
+          word_ptr += 1
+
+        elif transcript[transcript_ptr].get('shouldKeep') != True:
           transcript_builder.append(transcript[transcript_ptr+1])
-          if transcript[transcript_ptr+1].get(self._TEXT).lower() != words[word_ptr+1]  :
+
+          if not does_word_match_transcript(transcript_ptr + 1, word_ptr + 1):
             transcript_builder.append(transcript[transcript_ptr+2])
             transcript_ptr += 1
 
           transcript_ptr += 1
-          word_ptr += 1
+          word_ptr += 2
 
         transcript_ptr += 1
-        word_ptr += 1
 
       if len(transcript_builder) == 0:
         continue
       if len(transcript_builder) == 1:
-        word_ptr = word_ptr - 1
+        word_ptr -= 1
         continue
 
       new_text = list(map(lambda item: item.get('text'), transcript_builder))

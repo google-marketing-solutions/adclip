@@ -203,5 +203,5 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
                                           output_text)
 
   return  {
-      "summarized_transcript": segments
-    }
+    'summarized_transcript': segments
+  }

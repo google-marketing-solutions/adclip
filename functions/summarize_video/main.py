@@ -24,7 +24,7 @@ This functions is the microservice to process the following tasks:
 
 from firebase_functions import https_fn
 from firebase_admin import initialize_app, firestore
-from languages import Language, Default, Thai
+from languages import Language, DefaultLanguage, Thai
 import itertools
 import firestore, llm
 

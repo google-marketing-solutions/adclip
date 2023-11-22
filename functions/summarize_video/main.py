@@ -1,3 +1,17 @@
+# Copyright 2023 Google LLC
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     https://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Summarize Transcript
 
 This functions is the microservice to process the following tasks:
@@ -10,7 +24,7 @@ This functions is the microservice to process the following tasks:
 
 from firebase_functions import https_fn
 from firebase_admin import initialize_app, firestore
-import re
+from languages import Language, Default, Thai
 import itertools
 import firestore, llm
 
@@ -24,18 +38,20 @@ initialize_app()
 
 def calculate_duration(shortened_text: str,
                        transcript: list,
-                       video_shots: list) -> float:
+                       video_shots: list,
+                       input_transcript: list,
+                       language: Language) -> float:
   """Returns the total duration of all of the clips. This function evaluates if the
   shortened video fulfills the duration requirements from the users."""
   total_duration = 0
-  clips = get_clips_from_transcript(transcript, shortened_text)
+  clips = language.get_clips_from_transcript(
+    transcript, shortened_text, input_transcript)
   clips = match_with_video_shots(video_shots, clips, transcript)
   print('\\\\\\\\\calculate/////////')
   print(clips)
   for clip in clips:
     total_duration += clip.get('duration')
   return total_duration
-
 
 def match_with_video_shots(video_shots: list,
                            transcript: list,
@@ -82,93 +98,6 @@ def match_with_video_shots(video_shots: list,
   return transcript
 
 
-def get_clips_from_transcript(transcript: list,
-                              summary: str) -> list:
-  """Identifies the clip from the summarized transcript. This function minimizes the hallucination when LLM
-  doesn't respect the original sentences from the full transcripts by adding new words or only returning parts
-  of the original sentences in its response.
-
-  Example:
-    - Original sentence: "MacBook Air for the first time ever in 15 inches we've been dreaming about making this for years we"
-    - Response from LLM: "MacBook Air for the first time ever in 15 inches..."
-
-  Args:
-    transcript: The original full transcripts
-    summary: The "summarized" transcript from LLM
-
-  Returns:
-    A list containing the adjusted text, start_time, end_time, duration.
-  """
-  print("----get_clips_from_transcript-----'")
-  print(transcript)
-  index = 0
-  transcript_ptr = 0
-  output = []
-
-  # Remove the trailing "transcript:" from the summarized transcript from LLM
-  if summary.lstrip().lower().startswith('transcript:'):
-    summary = summary.lower().replace('transcript:', '', 1)
-  summary = re.sub('[,.?!]', '', summary).lower()
-  summary = summary.replace('\n', ' ')
-
-  words = summary.split(' ')
-  words = list(filter(lambda word: len(word) > 0, words))
-  print(words)
-
-  word_ptr = 0
-  while word_ptr < len(words) and transcript_ptr < len(transcript):
-    transcript_builder = []
-
-    while (transcript_ptr < len(transcript) and
-    word_ptr < len(words) and
-    transcript[transcript_ptr].get('shouldKeep') != True and
-    transcript[transcript_ptr].get('text').lower() != words[word_ptr]):
-      transcript_ptr = transcript_ptr + 1
-
-    while ((transcript_ptr < len(transcript) and
-    word_ptr < len(words) and (
-      transcript[transcript_ptr].get('shouldKeep') == True or
-      transcript[transcript_ptr].get('text').lower() == words[word_ptr]
-    ))
-
-    or (transcript_ptr < len(transcript) - 1 and
-    word_ptr < len(words) - 1 and
-    transcript[transcript_ptr+1].get('text').lower() == words[word_ptr+1])
-    or (transcript_ptr < len(transcript) - 2 and
-    word_ptr < len(words) - 1 and
-    transcript[transcript_ptr+2].get('text').lower() == words[word_ptr+1])):
-      transcript_builder.append(transcript[transcript_ptr])
-      if (transcript[transcript_ptr].get('shouldKeep') != True and
-      transcript[transcript_ptr].get('text').lower() != words[word_ptr]):
-        transcript_builder.append(transcript[transcript_ptr+1])
-        if transcript[transcript_ptr+1].get('text').lower() != words[word_ptr+1]:
-          transcript_builder.append(transcript[transcript_ptr+2])
-          transcript_ptr += 1
-
-        transcript_ptr += 1
-        word_ptr += 1
-
-      transcript_ptr += 1
-      word_ptr += 1
-
-    if len(transcript_builder) == 0:
-      continue
-    if len(transcript_builder) == 1:
-      word_ptr = word_ptr - 1
-      continue
-
-    new_text = list(map(lambda item: item.get('text'), transcript_builder))
-    output.append({
-      'text': ' '.join(new_text),
-      'startTime': transcript_builder[0].get('startTime'),
-      'endTime': transcript_builder[-1].get('endTime'),
-      'duration': (transcript_builder[-1].get('endTime') -
-             transcript_builder[0].get('startTime')),
-      'words': transcript_builder
-    })
-  return output
-
-
 @https_fn.on_call()
 def summarize_transcript(request: https_fn.CallableRequest) -> any:
   """Receives input from a HTTP request and processes data.
@@ -203,6 +132,11 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
     min_duration = MIN_DURATION
     language_code = LANGUAGE_CODE
 
+  if language_code == 'th-TH':
+    language = Thai()
+  else:
+    language = Default()
+
   full_text = '\n'.join([x["text"] for x in input_transcript])
   print('----full_text-----')
   print(full_text)
@@ -222,7 +156,12 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
   print('----shortened_text-----')
   print(shortened_text)
 
-  duration = calculate_duration(shortened_text, transcript_words, video_shots)
+  duration = calculate_duration(
+    shortened_text,
+    transcript_words,
+    video_shots,
+    input_transcript,
+    language)
   print('----duration-----')
   print(duration)
 
@@ -234,7 +173,12 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
       shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(full_text, user_prompt))
     else:
       shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(shortened_text, user_prompt))
-      duration = calculate_duration(shortened_text, transcript_words, video_shots)
+      duration = calculate_duration(
+        shortened_text,
+        transcript_words,
+        video_shots,
+        input_transcript,
+        language)
       count += 1
       print('----LOOP shortened_text-----')
       print(shortened_text)
@@ -243,7 +187,8 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
 
   firestore.upload_summary(full_text, shortened_text)
 
-  segments = get_clips_from_transcript(transcript_words, shortened_text)
+  segments = language.get_clips_from_transcript(
+    transcript_words, shortened_text, input_transcript)
   print('----segments-----')
   print(segments)
 

@@ -22,7 +22,7 @@ class Language:
       input_transcript: list) -> list:
     pass
 
-  def extract_words_from_str(summary: str) -> list:
+  def _extract_words_from_str(self, summary: str) -> list:
     """Extracts the words from the given summary splitting by space.
 
     Args:
@@ -72,7 +72,7 @@ class DefaultLanguage(Language):
     transcript_ptr = 0
     output = []
 
-    words = super.extract_words_from_str(shortened_text)
+    words = super()._extract_words_from_str(shortened_text)
 
     word_ptr = 0
     while word_ptr < len(words) and transcript_ptr < len(transcript):
@@ -155,7 +155,7 @@ class Thai(Language):
     is_matched = False
     latest_added_scene = -1
 
-    extracted_words = super.extract_words_from_str(shortened_text)
+    extracted_words = super()._extract_words_from_str(shortened_text)
 
     while words_ptr < len(extracted_words):
       if original_ptr >= len(original_transcript) and latest_added_scene < 0:

@@ -174,7 +174,7 @@ def generate_transcript_item(
     words: list, start_time: float = None, end_time: float = None) -> dict:
   """Generate transcript item."""
   start_time = words[0]['startTime'] if start_time is None else start_time
-  end_time = words[-1]['end_time'] if end_time is None else end_time
+  end_time = words[-1]['endTime'] if end_time is None else end_time
   return {
     'text': ' '.join(list(map(lambda word: word['text'], words))),
     'startTime': start_time,

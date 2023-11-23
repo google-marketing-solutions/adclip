@@ -135,7 +135,7 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
   if language_code == 'th-TH':
     language = Thai()
   else:
-    language = Default()
+    language = DefaultLanguage()
 
   full_text = '\n'.join([x["text"] for x in input_transcript])
   print('----full_text-----')

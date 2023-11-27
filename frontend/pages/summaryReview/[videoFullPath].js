@@ -11,11 +11,13 @@ import Button from '../../components/Button';
 
 function SummaryReview() {
   const store = Store.useStore();
+  const areTimestampsInEdit = store.get('areTimestampsInEdit');
   const isSummarizingTranscript = store.get('isSummarizingTranscript');
   const transcripts = store.get('summarizedTranscripts');
   const router = useRouter();
   const videoFullPath = router.query.videoFullPath;
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewCurrentTime, setPreviewCurrentTime] = useState(-1);
   const playerRef = useRef(null);
 
   const filename = getFilenameFromFullPath(videoFullPath);
@@ -26,7 +28,13 @@ function SummaryReview() {
     0,
   );
 
+  const onPreviewTimeUpdate = (currentTime) => {
+    setPreviewCurrentTime(currentTime);
+  };
+
   const togglePreview = () => {
+    if (isPreviewing) setPreviewCurrentTime(-1);
+    else store.set('areTimestampsInEdit')(false);
     setIsPreviewing(!isPreviewing);
   };
 
@@ -52,6 +60,16 @@ function SummaryReview() {
             ) : (
               <>
                 <div className={styles.editButtons}>
+                  {!isPreviewing && (
+                    <Button
+                      isSecondary
+                      disabled={isSummarizingTranscript}
+                      onClick={() => {
+                        store.set('areTimestampsInEdit')(!areTimestampsInEdit);
+                      }}>
+                      {!areTimestampsInEdit ? 'Adjust Timestamps' : 'Save'}
+                    </Button>
+                  )}
                   <Button
                     isSecondary
                     disabled={isSummarizingTranscript}
@@ -71,6 +89,10 @@ function SummaryReview() {
               : transcripts
             ).map((transcript, index) => (
               <TranscriptRow
+                isHighlighted={
+                  transcript.startTime <= previewCurrentTime &&
+                  transcript.endTime > previewCurrentTime
+                }
                 isLoading={isSummarizingTranscript}
                 index={index}
                 key={transcript.text}
@@ -88,6 +110,7 @@ function SummaryReview() {
                 <VideoReference
                   hasControls={false}
                   isAutoplay
+                  onTimeUpdateCallback={onPreviewTimeUpdate}
                   ref={playerRef}
                   transcripts={transcripts}
                 />

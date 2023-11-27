@@ -35,17 +35,15 @@ const effects = (store) => {
     }
   });
 
-  store
-    .on('isGettingOriginalVideoUrl')
-    .subscribe((isGettingOriginalVideoUrl) => {
-      if (isGettingOriginalVideoUrl) {
-        const selectedVideoFullPath = store.get('selectedVideoFullPath');
-        getDownloadURL(ref(getStorage(), selectedVideoFullPath)).then((url) => {
-          store.set('isGettingOriginalVideoUrl')(false);
-          store.set('reviewVideo')(url);
-        });
-      }
-    });
+  store.on('inputVideoFullPath').subscribe((videoFullPath) => {
+    if (videoFullPath != null) {
+      store.set('inputVideoURL')(null);
+      store.set('inputVideoFilename')(getFilenameFromFullPath(videoFullPath));
+      getDownloadURL(ref(getStorage(), videoFullPath)).then((url) => {
+        store.set('inputVideoURL')(url);
+      });
+    }
+  });
 
   return store;
 };

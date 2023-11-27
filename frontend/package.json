@@ -22,6 +22,7 @@
     "video-react": "^0.16.0"
   },
   "devDependencies": {
+    "eslint": "^8.53.0",
     "eslint-config-next": "14.0.1",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",

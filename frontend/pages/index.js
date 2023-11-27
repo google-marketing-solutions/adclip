@@ -83,7 +83,6 @@ export default function Home() {
 
   const transcribeVideo = () => {
     store.set('isTranscribingVideo')(true);
-    store.set('isGettingOriginalVideoUrl')(true);
     store.set('transcriptionError')(null);
     router.push('transcribeVideo/' + encodeURIComponent(selectedVideoFullPath));
   };

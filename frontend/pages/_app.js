@@ -3,12 +3,14 @@ import Head from 'next/head';
 import UserProvider from '../context/userContext';
 import {useUser} from '../context/userContext';
 import '../styles/global.sass';
-import {usePathname, useRouter} from 'next/navigation';
+import {useRouter} from 'next/router';
+import {usePathname} from 'next/navigation';
 import Store from '../store/AdClipStore';
 import Header from '../components/Header';
 import styles from './_app.module.sass';
 
 function Layout({children}) {
+  const store = Store.useStore();
   const router = useRouter();
   const pathname = usePathname();
   const {loadingUser, user} = useUser();
@@ -24,6 +26,12 @@ function Layout({children}) {
       router.push('/signIn');
     }
   }, [pathname, user, router, loadingUser]);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    const videoFullPath = router.query.videoFullPath;
+    store.set('inputVideoFullPath')(videoFullPath);
+  }, [router.isReady, router.query]);
 
   return (
     <>

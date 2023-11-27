@@ -15,8 +15,7 @@ const VideoReference = forwardRef(function VideoReference(
   playerRef,
 ) {
   const store = Store.useStore();
-  const isGettingOriginalVideoUrl = store.get('isGettingOriginalVideoUrl');
-  const source = store.get('reviewVideo');
+  const source = store.get('inputVideoURL');
   const previousSource = usePrevious(source);
 
   const timestamps = transcripts.map((transcript) => ({
@@ -54,7 +53,7 @@ const VideoReference = forwardRef(function VideoReference(
 
   return (
     <div style={{border: '1px solid black'}}>
-      {isGettingOriginalVideoUrl ? (
+      {source == null ? (
         <VideoPlayerShimmer />
       ) : (
         <Player

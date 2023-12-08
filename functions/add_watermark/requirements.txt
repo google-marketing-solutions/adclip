@@ -2,6 +2,5 @@ functions-framework==3.*
 google-cloud-speech
 google-cloud-aiplatform
 google-cloud-storage
-moviepy
 pyffmpeg
 ffmpeg

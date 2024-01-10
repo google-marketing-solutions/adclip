@@ -113,6 +113,7 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
             "max": 40,
             "min": 10,
             "language_code": "en-US",
+            "version": "automated",
         }
     }
 
@@ -123,6 +124,7 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
   input_transcript = request.data['transcript']
   user_prompt = request.data.get('prompt')
   filename = request.data.get('filename')
+  version = request.data.get('version')
   try:
     max_duration = float(request.data.get('max'))
     min_duration = float(request.data.get('min'))
@@ -137,53 +139,77 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
   else:
     language = DefaultLanguage()
 
-  full_text = '\n'.join([x["text"] for x in input_transcript])
-  print('----full_text-----')
-  print(full_text)
-
   list_of_words = list(map(lambda line: line['words'], input_transcript))
   transcript_words = list(itertools.chain.from_iterable(list_of_words))
-
   video_shots = firestore.get_video_shots(filename)
 
-  # 1st attempt to shorten transcript
-  shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(full_text, user_prompt))
+  if version == "automated":
+    full_text = '\n'.join([x["text"] for x in input_transcript])
+    print('----full_text-----')
+    print(full_text)
 
-  # TODO: Show in UI
-  if shortened_text == "The response was blocked":
-    return ValueError("The response was blocked due to potential violation of Responsible AI")
+    # 1st attempt to shorten transcript
+    shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(full_text, user_prompt))
 
-  print('----shortened_text-----')
-  print(shortened_text)
+    # TODO: Show in UI
+    if shortened_text == "The response was blocked":
+      return ValueError("The response was blocked due to potential violation of Responsible AI")
 
-  duration = calculate_duration(
-    shortened_text,
-    transcript_words,
-    video_shots,
-    input_transcript,
-    language)
-  print('----duration-----')
-  print(duration)
+    print('----shortened_text-----')
+    print(shortened_text)
 
-  # Validate duration and start a loop if duration condition is not met.
-  count = 0
-  max_try = 3
-  while count < max_try and (duration > max_duration or duration < min_duration):
-    if duration < min_duration:
-      shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(full_text, user_prompt))
-    else:
-      shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(shortened_text, user_prompt))
-      duration = calculate_duration(
-        shortened_text,
-        transcript_words,
-        video_shots,
-        input_transcript,
-        language)
-      count += 1
-      print('----LOOP shortened_text-----')
-      print(shortened_text)
-      print('----duration-----')
-      print(duration)
+    duration = calculate_duration(
+      shortened_text,
+      transcript_words,
+      video_shots,
+      input_transcript,
+      language)
+    print('----duration-----')
+    print(duration)
+
+    # Validate duration and start a loop if duration condition is not met.
+    # Keep the loop for maximum 3 times.
+    temperature = 0.2
+    while temperature < 0.6 and (duration > max_duration or duration < min_duration):
+      if duration < min_duration:
+        shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(full_text, user_prompt))
+      else:
+        shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(shortened_text, user_prompt))
+        duration = calculate_duration(
+          shortened_text,
+          transcript_words,
+          video_shots,
+          input_transcript,
+          language)
+        temperature += 0.1
+        print('----LOOP shortened_text-----')
+        print(shortened_text)
+        print('----duration-----')
+        print(duration)
+
+  if version == "topic":
+    full_text = '\n'.join([f'Line {counter}: {x["text"]}' for counter, x in enumerate(input_transcript)])
+    print('----full_text-----')
+    print(full_text)
+
+    summary_in_bullets = llm.send_transcript_to_llm(text=llm.make_prompt_summarize(full_text, user_prompt)).strip(" ")
+    print('----main-ideas-in-bullet-----')
+    print(summary_in_bullets)
+
+    branding_sentences = llm.send_transcript_to_llm(text=llm.keep_branding_sentences(full_text),
+                                              temperature=0.1).strip()
+    print('----branding_sentences-----')
+    print(branding_sentences)
+
+    match_sentences_to_bullet_points = llm.send_transcript_to_llm(text=llm.make_prompt_match_sentence_to_bullet_points(full_text,
+                                                                                                             summary_in_bullets)).strip()
+    match_sentences_to_bullet_points += '\n' + '\n' + branding_sentences
+    print('----match_sentences_to_bullet_points-----')
+    print(match_sentences_to_bullet_points)
+
+    shortened_text = llm.make_shortened_text(transformed_text=llm.transform_sentences_to_dict(match_sentences_to_bullet_points))
+    print('----shortened_text-----')
+    print(shortened_text)
 
   firestore.upload_summary(full_text, shortened_text)
 

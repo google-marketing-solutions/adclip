@@ -319,6 +319,11 @@ def get_transcript(file_name: str) -> bool:
 
   return doc.to_dict().get('original')
 
+def upload_transcript(file_name: str, transcript: list) -> None:
+  db = firestore.client()
+  doc_ref = db.collection('transcripts').document(file_name)
+  doc_ref.set({"original": transcript})
+
 @https_fn.on_call(timeout_sec=600, memory=options.MemoryOption.GB_4, cpu=2,
   region='asia-southeast1')
 def transcribe_video(request: https_fn.CallableRequest) -> any:
@@ -373,6 +378,7 @@ def transcribe_video(request: https_fn.CallableRequest) -> any:
   response = operation.result(timeout=900)
 
   transcript = build_transcript(response)
+  upload_transcript(file_name, transcript)
 
   return {
     'transcript': merge_clips(

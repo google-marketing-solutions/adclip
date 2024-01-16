@@ -1,14 +1,12 @@
 # AdClip
 
-N.B. This is not an officially supported Google product
-
 ## Solution Overview
 
 AdClip leverages Google's state-of-the-art AI to help advertisers adopt short-form creatives. It uses three AI technologies:
 
 - Generative AI to identify and trim the most important ideas from a video transcript.
 - Video Intelligence to understand the video's content and context.
-- Speech to text to transcribe the video's audio.
+- Speech to Text to transcribe the video's audio.
 
 AdClip uses these technologies to:
 
@@ -17,11 +15,16 @@ AdClip uses these technologies to:
 
 ## Implementation
 
-AdClip is a full-stack web application built on Google Cloud Platform (GCP). It offers a self-service UI that gives users a consistent and intuitive flow to generate short-form vertical and landscape videos from an existing long-form landscape video. AdClip is also open source, so advertisers can deploy it in their own GCP environment and integrate it to their own CMS if needed.
+AdClip is a full-stack web application built on Google Cloud Platform (GCP). It offers a self-service UI that gives users a consistent and intuitive flow to generate short-form vertical and landscape videos from an existing long-form landscape video. To deploy AdClip, you would need access to a Google Cloud Project with the following product enabled: Vertex AI API, Firebase.
 
-## Documentation
+## Contact
 
-- go/adclip
-- go/adclip-brd
-- go/adclip-prd
+- Team: Lan Tran, Ryan Sibbaluca
+- Contributors: Quy Nguyen, Pankamol Srikaew, Maggie Ting
 - Contact: <adclip-team@google.com>
+
+## Disclaimer
+
+This is not an officially supported Google product.
+
+Copyright 2023 Google LLC. This solution, including any related sample code or data, is made available on an “as is,” “as available,” and “with all faults” basis, solely for illustrative purposes, and without warranty or representation of any kind. This solution is experimental, unsupported and provided solely for your convenience. Your use of it is subject to your agreements with Google, as applicable, and may constitute a beta feature as defined under those agreements. To the extent that you make any data available to Google in connection with your use of the solution, you represent and warrant that you have all necessary and appropriate rights, consents and permissions to permit Google to use and process that data. By using any portion of this solution, you acknowledge, assume and accept all risks, known and unknown, associated with its usage, including with respect to your deployment of any portion of this solution in your systems, or usage in connection with your business, if at all.

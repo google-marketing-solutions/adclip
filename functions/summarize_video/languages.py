@@ -17,7 +17,7 @@ import re
 class Language:
   def get_clips_from_transcript(
       self,
-      transcript: list,
+      transcript_words: list,
       shortened_text: str,
       input_transcript: list) -> list:
     pass
@@ -49,7 +49,7 @@ class DefaultLanguage(Language):
 
   def get_clips_from_transcript(
       self,
-      transcript: list,
+      transcript_words: list,
       shortened_text: str,
       input_transcript: list) -> list:
     """Identifies the clip from the summarized transcript. This function  minimizes the hallucination when LLM
@@ -68,48 +68,49 @@ class DefaultLanguage(Language):
       A list containing the adjusted text, start_time, end_time, duration.
     """
     print("----get_clips_from_transcript-----'")
-    print(transcript)
+    print(transcript_words)
     transcript_ptr = 0
     output = []
 
-    words = super()._extract_words_from_str(shortened_text)
+    summary_words = super()._extract_words_from_str(shortened_text)
 
     word_ptr = 0
 
     def does_word_match_transcript(transcript_idx: int, word_idx: int):
-      if transcript_idx >= len(transcript) or word_idx >= len(words):
+      if (transcript_idx >= len(transcript_words) or
+          word_idx >= len(summary_words)):
         return False
 
-      return (transcript[transcript_idx].get('text').lower() ==
-              words[word_idx].lower())
+      return (transcript_words[transcript_idx].get('text').lower() ==
+              summary_words[word_idx].lower())
 
-    while word_ptr < len(words) or transcript_ptr < len(transcript):
+    while transcript_ptr < len(transcript_words):
       transcript_builder = []
 
       # loop until the summary word match with transcript
       # or until the transcript has True shouldKeep flag
-      while (transcript_ptr < len(transcript)
+      while (transcript_ptr < len(transcript_words)
              and not does_word_match_transcript(transcript_ptr, word_ptr)
-             and transcript[transcript_ptr].get('shouldKeep') != True):
+             and transcript_words[transcript_ptr].get('shouldKeep') != True):
         transcript_ptr = transcript_ptr + 1
 
       # append all matched transcript summary
       # or transcript that has True shouldKeep flag
-      while (transcript_ptr < len(transcript)
-             and (does_word_match_transcript(transcript_ptr, word_ptr)
-                  or does_word_match_transcript(transcript_ptr + 1, word_ptr + 1)
-                  or does_word_match_transcript(transcript_ptr + 2, word_ptr + 1)
-                  or transcript[transcript_ptr].get('shouldKeep') == True)):
-        transcript_builder.append(transcript[transcript_ptr])
+      while (transcript_ptr < len(transcript_words) and
+              (does_word_match_transcript(transcript_ptr, word_ptr)
+               or does_word_match_transcript(transcript_ptr + 1, word_ptr + 1)
+               or does_word_match_transcript(transcript_ptr + 2, word_ptr + 1)
+               or transcript_words[transcript_ptr].get('shouldKeep') == True)):
+        transcript_builder.append(transcript_words[transcript_ptr])
 
         if does_word_match_transcript(transcript_ptr, word_ptr):
           word_ptr += 1
 
-        elif transcript[transcript_ptr].get('shouldKeep') != True:
-          transcript_builder.append(transcript[transcript_ptr+1])
+        elif transcript_words[transcript_ptr].get('shouldKeep') != True:
+          transcript_builder.append(transcript_words[transcript_ptr+1])
 
           if not does_word_match_transcript(transcript_ptr + 1, word_ptr + 1):
-            transcript_builder.append(transcript[transcript_ptr+2])
+            transcript_builder.append(transcript_words[transcript_ptr+2])
             transcript_ptr += 1
 
           transcript_ptr += 1
@@ -137,7 +138,7 @@ class DefaultLanguage(Language):
 class Thai(Language):
   def get_clips_from_transcript(
       self,
-      transcript: list,
+      transcript_words: list,
       shortened_text: str,
       input_transcript: list):
     """Matches the shortened text to the original transcript for getting

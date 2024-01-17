@@ -37,7 +37,7 @@ initialize_app()
 
 
 def calculate_duration(shortened_text: str,
-                       transcript: list,
+                       transcript_words: list,
                        video_shots: list,
                        input_transcript: list,
                        language: Language) -> float:
@@ -45,8 +45,8 @@ def calculate_duration(shortened_text: str,
   shortened video fulfills the duration requirements from the users."""
   total_duration = 0
   clips = language.get_clips_from_transcript(
-    transcript, shortened_text, input_transcript)
-  clips = match_with_video_shots(video_shots, clips, transcript)
+    transcript_words, shortened_text, input_transcript)
+  clips = match_with_video_shots(video_shots, clips, transcript_words)
   print('\\\\\\\\\calculate/////////')
   print(clips)
   for clip in clips:
@@ -77,7 +77,6 @@ def match_with_video_shots(video_shots: list,
 
     start_time = min(line['startTime'], video_shot['start_time'])
     transcript[index]['startTime'] = start_time
-    print(f'start_time: {start_time}')
 
     while video_shots[shot_index]['end_time'] < line['endTime']:
       shot_index += 1

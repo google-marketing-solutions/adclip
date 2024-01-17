@@ -71,27 +71,33 @@ def match_with_video_shots(video_shots: list,
   shot_index = 0
   word_index = 0
   for index, line in enumerate(transcript):
-    while video_shots[shot_index]['end_time'] < line['startTime']:
+    while video_shots[shot_index]['end_time'] <= line['startTime']:
       shot_index += 1
     video_shot = video_shots[shot_index]
 
     start_time = min(line['startTime'], video_shot['start_time'])
+    while (word_index + 1 < len(words) - 1 and words[word_index+1]['endTime']
+        < line['startTime']):
+      word_index += 1
+    previous_word = words[word_index]
+    if previous_word['startTime'] != line['startTime']:
+      start_time = max(previous_word['endTime'], start_time)
+
     transcript[index]['startTime'] = start_time
 
     while video_shots[shot_index]['end_time'] < line['endTime']:
       shot_index += 1
     video_shot = video_shots[shot_index]
 
-    while (word_index < len(words) - 1 and words[word_index]['startTime']
-        < line['endTime']):
-      word_index += 1
-
     end_time = max(line['endTime'], video_shot['end_time'])
 
-    if words[word_index]['endTime'] != line['endTime']:
-      end_time = max(line['endTime'], min(video_shot['end_time'],
-        words[word_index]['startTime']))
-    print(f'end_time: {end_time}')
+    while (word_index < len(words) - 2 and words[word_index]['startTime']
+        < line['endTime']):
+      word_index += 1
+    next_word = words[word_index]
+    if next_word['endTime'] != line['endTime']:
+      end_time = min(end_time, next_word['startTime'])
+
     transcript[index]['endTime'] = end_time
     transcript[index]['duration'] = end_time - start_time
   return transcript

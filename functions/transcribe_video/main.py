@@ -281,7 +281,7 @@ def refine_by_video_shots(
 
   for index, word in enumerate(transcript_words):
     words.append(word)
-    while video_shots[video_shots_index]['end_time'] < words[0]['startTime']:
+    while video_shots[video_shots_index]['end_time'] <= words[0]['startTime']:
       video_shots_index = video_shots_index + 1
     video_shot = video_shots[video_shots_index]
     if word['endTime'] > video_shot['end_time']:
@@ -301,6 +301,10 @@ def refine_by_video_shots(
     start_time = min(
       words[0]['startTime'],
       video_shots[video_shots_index]['start_time'])
+    if (len(new_transcript) > 0):
+      previous_last_word = new_transcript[-1]['words'][-1]
+      start_time = max(start_time, previous_last_word['endTime'])
+
     end_time = max(
       word['endTime'],
       video_shots[video_shots_index]['end_time'])
@@ -318,6 +322,11 @@ def get_transcript(file_name: str) -> bool:
       return None
 
   return doc.to_dict().get('original')
+
+def upload_transcript(file_name: str, transcript: list) -> None:
+  db = firestore.client()
+  doc_ref = db.collection('transcripts').document(file_name)
+  doc_ref.set({"original": transcript})
 
 @https_fn.on_call(timeout_sec=600, memory=options.MemoryOption.GB_4, cpu=2,
   region='asia-southeast1')
@@ -373,6 +382,7 @@ def transcribe_video(request: https_fn.CallableRequest) -> any:
   response = operation.result(timeout=900)
 
   transcript = build_transcript(response)
+  upload_transcript(file_name, transcript)
 
   return {
     'transcript': merge_clips(

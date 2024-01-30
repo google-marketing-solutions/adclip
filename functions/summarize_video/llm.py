@@ -18,7 +18,7 @@ from vertexai.preview.language_models import TextGenerationModel
 
 
 def send_transcript_to_llm(text: str,
-                           model: str = "text-bison@002",
+                           model_name: str,
                            temperature: float = 0.2,
                            max_output_tokens: int = 1024,
                            top_k: int = 40,
@@ -38,7 +38,7 @@ def send_transcript_to_llm(text: str,
   """
   # AdClip uses the default value for parameters
   # https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text
-  model = TextGenerationModel.from_pretrained(model)
+  model = TextGenerationModel.from_pretrained(model_name=model_name)
   response = model.predict(text,
     temperature=temperature,
     max_output_tokens=max_output_tokens,

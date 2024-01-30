@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Summarize Transcript
+"""Summarize Transcript by Duration (best effort).
 
-This functions is the microservice to process the following tasks:
-  - Sends the full transcript to Vertex LLM and receives the shortened transcript
-  - Syncs each sentence in the shortened transcript with its responding video shot
+This function is the microservice to process the following tasks:
+  - Sends the transcript to Vertex LLM and receives the shortened transcript
+  - Syncs each sentence in the shortened transcript with its video shot
   - Calculates the duration of all segments (text + shots)
   - Returns the final segments of the summarized video
 """
@@ -24,13 +24,16 @@ This functions is the microservice to process the following tasks:
 
 from firebase_functions import https_fn
 from firebase_admin import initialize_app, firestore
-from languages import Language, DefaultLanguage, Thai
+from languages import Language
+from languages import DefaultLanguage
+from languages import Thai
 import itertools
 import firestore, llm
 
 MAX_DURATION = float(40)
 MIN_DURATION = float(10)
-LANGUAGE_CODE = "en-US"
+LANGUAGE_CODE = 'en-US'
+MODEL_NAME = 'text-bison@002'
 
 
 initialize_app()
@@ -41,11 +44,15 @@ def calculate_duration(shortened_text: str,
                        video_shots: list,
                        input_transcript: list,
                        language: Language) -> float:
-  """Returns the total duration of all of the clips. This function evaluates if the
-  shortened video fulfills the duration requirements from the users."""
+  """Returns the total duration of all of the clips.
+
+  This function evaluates if the shortened video fulfills the duration
+  requirements from the users.
+  """
   total_duration = 0
   clips = language.get_clips_from_transcript(
-    transcript_words, shortened_text, input_transcript)
+      transcript_words, shortened_text, input_transcript
+  )
   clips = match_with_video_shots(video_shots, clips, transcript_words)
   print('\\\\\\\\\calculate/////////')
   print(clips)
@@ -53,17 +60,20 @@ def calculate_duration(shortened_text: str,
     total_duration += clip.get('duration')
   return total_duration
 
+
 def match_with_video_shots(video_shots: list,
                            transcript: list,
                            words: list) -> list:
-  """Adjusts the startTime and endTime of each line in the transcript according to the
-  start_time and end_time of each shot. This implementation helps with "jumpy" transition
-  in the final output video.
+  """Adjusts the startTime and endTime of each line in the transcript.
+
+  This implementation helps with "jumpy" transition in the final output video.
 
   Args:
-    video_shots: The list containing video shots in format of [{end_time, start_time}, {end_time, start_time},]
-    transcript: The full transcript of the video as transcribed by Speech to Text AI.
-    words: A list containing the startTime and eachTime of each word in the full transcript.
+    video_shots: The list containing video shots in format of
+    [{end_time, start_time}, {end_time, start_time},]
+    transcript: The full transcript transcribed by Speech to Text AI.
+    words: A list containing the startTime and eachTime of each word in the full
+    transcript.
 
   Returns:
     The transcript with the adjusted startTime and endTime.
@@ -76,8 +86,10 @@ def match_with_video_shots(video_shots: list,
     video_shot = video_shots[shot_index]
 
     start_time = min(line['startTime'], video_shot['start_time'])
-    while (word_index + 1 < len(words) - 1 and words[word_index+1]['endTime']
-        < line['startTime']):
+    while (
+        word_index + 1 < len(words) - 1
+        and words[word_index + 1]['endTime'] < line['startTime']
+    ):
       word_index += 1
     previous_word = words[word_index]
     if previous_word['startTime'] != line['startTime']:
@@ -91,8 +103,10 @@ def match_with_video_shots(video_shots: list,
 
     end_time = max(line['endTime'], video_shot['end_time'])
 
-    while (word_index < len(words) - 2 and words[word_index]['startTime']
-        < line['endTime']):
+    while (
+        word_index < len(words) - 2
+        and words[word_index]['startTime'] < line['endTime']
+    ):
       word_index += 1
     next_word = words[word_index]
     if next_word['endTime'] != line['endTime']:
@@ -115,10 +129,10 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
             "transcript": [],
             "prompt": " ",
             "filename": "video",
-            "max": 40,
-            "min": 10,
+            "max_duration": 40,
+            "min_duration": 10,
             "language_code": "en-US",
-            "version": "automated",
+            "model_name": "text-bison@002"
         }
     }
 
@@ -129,15 +143,22 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
   input_transcript = request.data['transcript']
   user_prompt = request.data.get('prompt')
   filename = request.data.get('filename')
-  version = request.data.get('version')
   try:
-    max_duration = float(request.data.get('max'))
-    min_duration = float(request.data.get('min'))
-    language_code = request.data.get('language_code')
+    max_duration = float(request.data.get('max_duration'))
   except:
     max_duration = MAX_DURATION
+  try:
+    min_duration = float(request.data.get('min_duration'))
+  except:
     min_duration = MIN_DURATION
+  try:
+    language_code = request.data.get('language_code')
+  except:
     language_code = LANGUAGE_CODE
+  try:
+    model_name = request.data.get('model_name')
+  except:
+    model_name = MODEL_NAME
 
   if language_code == 'th-TH':
     language = Thai()
@@ -147,79 +168,62 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
   list_of_words = list(map(lambda line: line['words'], input_transcript))
   transcript_words = list(itertools.chain.from_iterable(list_of_words))
   video_shots = firestore.get_video_shots(filename)
+  print('===1===transcript_words===1=====')
+  print(transcript_words)
 
-  if version == "automated":
-    full_text = '\n'.join([x["text"] for x in input_transcript])
-    print('----full_text-----')
-    print(full_text)
+  full_text = '\n'.join([x['text'] for x in input_transcript])
+  print('----full_text-----')
+  print(full_text)
 
-    # 1st attempt to shorten transcript
-    shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(full_text, user_prompt))
+  # 1st attempt to shorten transcript.
+  shortened_text = llm.send_transcript_to_llm(
+      text=llm.make_prompt(full_text, user_prompt), model_name=model_name
+  )
 
-    # TODO: Show in UI
-    if shortened_text == "The response was blocked":
-      return ValueError("The response was blocked due to potential violation of Responsible AI")
+  if shortened_text == 'The response was blocked':
+    return ValueError(
+        'The response was blocked due to potential violation of Responsible AI'
+    )
 
-    print('----shortened_text-----')
-    print(shortened_text)
+  print('----shortened_text-----')
+  print(shortened_text)
 
-    duration = calculate_duration(
-      shortened_text,
-      transcript_words,
-      video_shots,
-      input_transcript,
-      language)
-    print('----duration-----')
-    print(duration)
+  duration = calculate_duration(
+      shortened_text, transcript_words, video_shots, input_transcript, language
+  )
+  print('----duration-----')
+  print(duration)
 
-    # Validate duration and start a loop if duration condition is not met.
-    # Keep the loop for maximum 3 times.
-    temperature = 0.2
-    while temperature < 0.6 and (duration > max_duration or duration < min_duration):
-      if duration < min_duration:
-        shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(full_text, user_prompt))
-      else:
-        shortened_text = llm.send_transcript_to_llm(text=llm.make_prompt(shortened_text, user_prompt))
-        duration = calculate_duration(
+  # Validate duration and start a loop if duration condition is not met.
+  # Keep the loop for maximum 3 times.
+  temperature = 0.2
+  while temperature < 0.6 and (
+      duration > max_duration or duration < min_duration
+  ):
+    if duration < min_duration:
+      shortened_text = llm.send_transcript_to_llm(
+          text=llm.make_prompt(full_text, user_prompt), model_name=model_name
+      )
+    else:
+      shortened_text = llm.send_transcript_to_llm(
+          text=llm.make_prompt(shortened_text, user_prompt),
+          model_name=model_name,
+      )
+      duration = calculate_duration(
           shortened_text,
           transcript_words,
           video_shots,
           input_transcript,
-          language)
-        temperature += 0.1
-        print('----LOOP shortened_text-----')
-        print(shortened_text)
-        print('----duration-----')
-        print(duration)
-
-  if version == "topic":
-    full_text = '\n'.join([f'Line {counter}: {x["text"]}' for counter, x in enumerate(input_transcript)])
-    print('----full_text-----')
-    print(full_text)
-
-    summary_in_bullets = llm.send_transcript_to_llm(text=llm.make_prompt_summarize(full_text, user_prompt)).strip(" ")
-    print('----main-ideas-in-bullet-----')
-    print(summary_in_bullets)
-
-    branding_sentences = llm.send_transcript_to_llm(text=llm.keep_branding_sentences(full_text),
-                                              temperature=0.1).strip()
-    print('----branding_sentences-----')
-    print(branding_sentences)
-
-    match_sentences_to_bullet_points = llm.send_transcript_to_llm(text=llm.make_prompt_match_sentence_to_bullet_points(full_text,
-                                                                                                             summary_in_bullets)).strip()
-    match_sentences_to_bullet_points += '\n' + '\n' + branding_sentences
-    print('----match_sentences_to_bullet_points-----')
-    print(match_sentences_to_bullet_points)
-
-    shortened_text = llm.make_shortened_text(transformed_text=llm.transform_sentences_to_dict(match_sentences_to_bullet_points))
-    print('----shortened_text-----')
-    print(shortened_text)
-
-  firestore.upload_summary(full_text, shortened_text)
-
+          language,
+      )
+      temperature += 0.1
+      print('----LOOP shortened_text-----')
+      print(shortened_text)
+      print('----duration-----')
+      print(duration)
   segments = language.get_clips_from_transcript(
-    transcript_words, shortened_text, input_transcript)
+      transcript_words, shortened_text, input_transcript
+  )
   print('----segments-----')
   print(segments)
 
@@ -234,5 +238,5 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
                                           output_text)
 
   return  {
-    'summarized_transcript': segments
+      'summarized_transcript': segments
   }

@@ -28,12 +28,14 @@ from languages import Language
 from languages import DefaultLanguage
 from languages import Thai
 import itertools
-import firestore, llm
+import firestore
+import llm
+
 
 MAX_DURATION = float(40)
 MIN_DURATION = float(10)
-LANGUAGE_CODE = 'en-US'
-MODEL_NAME = 'text-bison@002'
+LANGUAGE_CODE = "en-US"
+MODEL_NAME = "text-unicorn@001"
 
 
 initialize_app()
@@ -143,6 +145,9 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
   input_transcript = request.data['transcript']
   user_prompt = request.data.get('prompt')
   filename = request.data.get('filename')
+  language_code = request.data.get('language_code') or LANGUAGE_CODE
+  model_name = request.data.get('model_name') or MODEL_NAME
+
   try:
     max_duration = float(request.data.get('max_duration'))
   except:
@@ -151,14 +156,6 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
     min_duration = float(request.data.get('min_duration'))
   except:
     min_duration = MIN_DURATION
-  try:
-    language_code = request.data.get('language_code')
-  except:
-    language_code = LANGUAGE_CODE
-  try:
-    model_name = request.data.get('model_name')
-  except:
-    model_name = MODEL_NAME
 
   if language_code == 'th-TH':
     language = Thai()
@@ -177,7 +174,8 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
 
   # 1st attempt to shorten transcript.
   shortened_text = llm.send_transcript_to_llm(
-      text=llm.make_prompt(full_text, user_prompt), model_name=model_name
+      text=llm.make_prompt(full_text, user_prompt, language_code=language_code),
+      model=model_name, temperature=0.2
   )
 
   if shortened_text == 'The response was blocked':
@@ -197,30 +195,29 @@ def summarize_transcript(request: https_fn.CallableRequest) -> any:
   # Validate duration and start a loop if duration condition is not met.
   # Keep the loop for maximum 3 times.
   temperature = 0.2
-  while temperature < 0.6 and (
+  while temperature <= 0.6 and (
       duration > max_duration or duration < min_duration
   ):
-    if duration < min_duration:
-      shortened_text = llm.send_transcript_to_llm(
-          text=llm.make_prompt(full_text, user_prompt), model_name=model_name
-      )
-    else:
-      shortened_text = llm.send_transcript_to_llm(
-          text=llm.make_prompt(shortened_text, user_prompt),
-          model_name=model_name,
-      )
-      duration = calculate_duration(
-          shortened_text,
-          transcript_words,
-          video_shots,
-          input_transcript,
-          language,
-      )
-      temperature += 0.1
-      print('----LOOP shortened_text-----')
-      print(shortened_text)
-      print('----duration-----')
-      print(duration)
+    temperature += 0.2
+    shortened_text = llm.send_transcript_to_llm(
+        text=llm.make_prompt(
+            shortened_text, user_prompt, language_code=language_code
+        ),
+        model=model_name,
+        temperature=temperature,
+    )
+    duration = calculate_duration(
+        shortened_text,
+        transcript_words,
+        video_shots,
+        input_transcript,
+        language,
+    )
+    print('----LOOP shortened_text-----')
+    print(shortened_text)
+    print('----duration-----')
+    print(duration)
+
   segments = language.get_clips_from_transcript(
       transcript_words, shortened_text, input_transcript
   )

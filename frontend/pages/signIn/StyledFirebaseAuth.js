@@ -17,7 +17,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {onAuthStateChanged} from 'firebase/auth';
 import 'firebaseui/dist/firebaseui.css';
-import {auth} from 'firebaseui';
 
 const StyledFirebaseAuth = ({
   uiConfig,

@@ -40,9 +40,11 @@ const effects = (store) => {
   store.on('isTranscribingVideo').subscribe((isTranscribingVideo) => {
     if (isTranscribingVideo) {
       const inputVideoFullPath = store.get('inputVideoFullPath');
+      const language = store.get('language');
       callTranscribeVideo({
         full_path: inputVideoFullPath,
         file_name: getFilenameFromFullPath(inputVideoFullPath),
+        language_code: language,
       })
         .then((result) => {
           store.set('isTranscribingVideo')(false);
@@ -69,6 +71,7 @@ const effects = (store) => {
     if (isSummarizingTranscript) {
       const inputVideoFullPath = store.get('inputVideoFullPath');
       const transcripts = store.get('reviewTranscripts');
+      const language = store.get('language');
       const minDuration = store.get('minDuration');
       const maxDuration = store.get('maxDuration');
       callSummarizeTranscript({
@@ -76,6 +79,7 @@ const effects = (store) => {
         transcript: transcripts,
         min_duration: minDuration,
         max_duration: maxDuration,
+        language_code: language,
       })
         .then((result) => {
           const summarizedTranscript = result.data.summarized_transcript;

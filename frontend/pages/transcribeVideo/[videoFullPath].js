@@ -41,6 +41,9 @@ function TranscriptReview() {
     }
   }, [inputVideoFullPath]);
 
+  const summarizeTranscript = () => {
+    router.push('/summaryReview/' + encodeURIComponent(inputVideoFullPath));
+  };
   return (
     <>
       <Head>
@@ -79,6 +82,7 @@ function TranscriptReview() {
             <div className={styles.nextButtonContainer}>
               <DurationInput
                 disabled={isTranscribingVideo}
+                onSubmit={summarizeTranscript}
                 submitText="Summarize Transcript"
               />
             </div>

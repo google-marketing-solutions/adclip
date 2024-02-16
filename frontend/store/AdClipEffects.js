@@ -16,7 +16,10 @@
 
 import {getDownloadURL, getStorage, ref, uploadBytes} from 'firebase/storage';
 import {createFirebaseApp} from '../firebase/clientApp';
-import {callTranscribeVideo} from '../fetchData/cloudFunctions';
+import {
+  callTranscribeVideo,
+  callSummarizeTranscript,
+} from '../fetchData/cloudFunctions';
 import {getFilenameFromFullPath} from '../fetchData/cloudStorage';
 
 const INPUT_VIDEOS_FOLDER = 'videos/';
@@ -58,6 +61,31 @@ const effects = (store) => {
       getDownloadURL(ref(getStorage(), videoFullPath)).then((url) => {
         store.set('inputVideoURL')(url);
       });
+    }
+  });
+
+  store.on('isSummarizingTranscript').subscribe((isSummarizingTranscript) => {
+    if (isSummarizingTranscript) {
+      const inputVideoFullPath = store.get('inputVideoFullPath');
+      const transcripts = store.get('reviewTranscripts');
+      const minDuration = store.get('minDuration');
+      const maxDuration = store.get('maxDuration');
+      callSummarizeTranscript({
+        filename: getFilenameFromFullPath(inputVideoFullPath),
+        transcript: transcripts,
+        min_duration: minDuration,
+        max_duration: maxDuration,
+      })
+        .then((result) => {
+          const summarizedTranscript = result.data.summarized_transcript;
+          store.set('summarizedTranscripts')(summarizedTranscript);
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          store.set('isSummarizingTranscript')(false);
+        });
     }
   });
 

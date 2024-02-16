@@ -30,6 +30,7 @@ const initialState = {
   isTranscriptInEdit: false,
   maxDuration: 40,
   minDuration: 20,
+  outputVideos: [],
   reviewTranscripts: [],
   selectedFilesForUpload: [],
   selectedVideoFullPath: null,

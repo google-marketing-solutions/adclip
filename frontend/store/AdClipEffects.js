@@ -17,6 +17,7 @@
 import {getDownloadURL, getStorage, ref, uploadBytes} from 'firebase/storage';
 import {createFirebaseApp} from '../firebase/clientApp';
 import {
+  callCutVideo,
   callTranscribeVideo,
   callSummarizeTranscript,
 } from '../fetchData/cloudFunctions';
@@ -85,6 +86,46 @@ const effects = (store) => {
         })
         .finally(() => {
           store.set('isSummarizingTranscript')(false);
+        });
+    }
+  });
+
+  store.on('isGeneratingVideos').subscribe((isGeneratingVideos) => {
+    if (isGeneratingVideos) {
+      const inputVideoFullPath = store.get('inputVideoFullPath');
+      const summarizedTranscripts = store.get('summarizedTranscripts');
+      const inputVideoUrl = store.get('inputVideoURL');
+      callCutVideo({
+        fileName: getFilenameFromFullPath(inputVideoFullPath),
+        videoUrl: inputVideoUrl,
+        transcript: summarizedTranscripts,
+      })
+        .then((result) => {
+          const {full_path: fullPath, full_path_vertical: fullPathVertical} =
+            result.data;
+          const promises = [
+            getDownloadURL(ref(storage, fullPath)).then((url) => ({
+              url,
+              fullPath,
+            })),
+          ];
+          if (fullPathVertical) {
+            promises.push(
+              getDownloadURL(ref(storage, fullPathVertical)).then((url) => ({
+                url,
+                fullPath: fullPathVertical,
+              })),
+            );
+          }
+          Promise.all(promises).then((outputVideos) => {
+            store.set('outputVideos')(outputVideos);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          store.set('isGeneratingVideos')(false);
         });
     }
   });

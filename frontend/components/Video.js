@@ -45,9 +45,7 @@ function Video({name, isLoading, source}) {
   };
 
   const downloadVideo = () => {
-    const filePathArr = fullPath.split('/');
-    const fileName = filePathArr[filePathArr.length - 1];
-    download(source, filename);
+    download(source, name);
   };
 
   return (

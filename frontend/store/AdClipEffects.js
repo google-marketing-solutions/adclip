@@ -104,17 +104,19 @@ const effects = (store) => {
           const {full_path: fullPath, full_path_vertical: fullPathVertical} =
             result.data;
           const promises = [
-            getDownloadURL(ref(storage, fullPath)).then((url) => ({
+            getDownloadURL(ref(getStorage(), fullPath)).then((url) => ({
               url,
               fullPath,
             })),
           ];
           if (fullPathVertical) {
             promises.push(
-              getDownloadURL(ref(storage, fullPathVertical)).then((url) => ({
-                url,
-                fullPath: fullPathVertical,
-              })),
+              getDownloadURL(ref(getStorage(), fullPathVertical)).then(
+                (url) => ({
+                  url,
+                  fullPath: fullPathVertical,
+                }),
+              ),
             );
           }
           Promise.all(promises).then((outputVideos) => {

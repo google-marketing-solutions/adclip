@@ -36,6 +36,7 @@ const initialState = {
   selectedFilesForUpload: [],
   selectedVideoFullPath: null,
   summarizedTranscripts: [],
+  textModel: 'text-unicorn@001',
   transcriptionError: null,
 };
 

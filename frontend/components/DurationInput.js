@@ -28,6 +28,8 @@ const MIN_DURATION = 10;
 const MIN_DURATION_GAP = 10;
 const SLIDER_STEP = 5;
 
+const textModels = ['text-unicorn@001', 'text-bison@001', 'text-bison@002'];
+
 /**
  * Component that allows user to input the expected minimum and maximum duration
  * for the output video.
@@ -44,6 +46,8 @@ function DurationInput({
   const maxDuration = store.get('maxDuration');
   const setMinDuration = store.set('minDuration');
   const setMaxDuration = store.set('maxDuration');
+  const textModel = store.get('textModel');
+  const setTextModel = store.set('textModel');
   const onSliderChange = ([min, max]) => {
     setMinDuration(min);
     setMaxDuration(max);
@@ -89,6 +93,20 @@ function DurationInput({
             value={maxDuration}
           />
         </div>
+      </div>
+      <div className={styles.textModelsContainer}>
+        <label for="text_models">Text Model:</label>
+        <select
+          id="text_models"
+          onChange={(e) => setTextModel(e.target.value)}
+          defaultValue={textModel}
+          value={textModel}>
+          {textModels.map((model) => (
+            <option key={model} value={model}>
+              {model}
+            </option>
+          ))}
+        </select>
       </div>
       <Button disabled={disabled} isSecondary={isSecondary} onClick={onSubmit}>
         {submitText}

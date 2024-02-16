@@ -74,12 +74,14 @@ const effects = (store) => {
       const language = store.get('language');
       const minDuration = store.get('minDuration');
       const maxDuration = store.get('maxDuration');
+      const textModel = store.get('textModel');
       callSummarizeTranscript({
         filename: getFilenameFromFullPath(inputVideoFullPath),
         transcript: transcripts,
         min_duration: minDuration,
         max_duration: maxDuration,
         language_code: language,
+        model_name: textModel,
       })
         .then((result) => {
           const summarizedTranscript = result.data.summarized_transcript;

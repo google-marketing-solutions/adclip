@@ -24,7 +24,7 @@ import clsx from 'clsx';
 import TranscriptRow from '../../components/TranscriptRow';
 import VideoReference from '../../components/VideoReference';
 import Button from '../../components/Button';
-import DurationInput from '../../components/DurationInput';
+import SummaryInputs from '../../components/SummaryInputs';
 
 function SummaryReview() {
   const store = Store.useStore();
@@ -163,7 +163,7 @@ function SummaryReview() {
           </section>
           <div className={styles.divider} />
           <section>
-            <DurationInput
+            <SummaryInputs
               disabled={isSummarizingTranscript}
               onSubmit={resummarize}
               submitText="Resummarize"

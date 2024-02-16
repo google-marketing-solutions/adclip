@@ -18,7 +18,6 @@ import 'rc-slider/assets/index.css';
 import styles from './DurationInput.module.sass';
 import Store from '../store/AdClipStore';
 import Input from './Input';
-import Button from './Button';
 import Slider from 'rc-slider';
 import clsx from 'clsx';
 
@@ -28,89 +27,56 @@ const MIN_DURATION = 10;
 const MIN_DURATION_GAP = 10;
 const SLIDER_STEP = 5;
 
-const textModels = ['text-unicorn@001', 'text-bison@001', 'text-bison@002'];
-
 /**
  * Component that allows user to input the expected minimum and maximum duration
  * for the output video.
  */
-function DurationInput({
-  disabled,
-  isCompact = false,
-  isSecondary = false,
-  onSubmit,
-  submitText,
-}) {
+function DurationInput({isCompact = false}) {
   const store = Store.useStore();
   const minDuration = store.get('minDuration');
   const maxDuration = store.get('maxDuration');
   const setMinDuration = store.set('minDuration');
   const setMaxDuration = store.set('maxDuration');
-  const textModel = store.get('textModel');
-  const setTextModel = store.set('textModel');
   const onSliderChange = ([min, max]) => {
     setMinDuration(min);
     setMaxDuration(max);
   };
 
   return (
-    <div className={clsx(isCompact && styles.summarizeActionContainer)}>
-      <div
-        className={clsx(
-          isCompact && styles.compact,
-          styles.summarizeActionInputs,
-        )}>
-        <label>Output Duration (in seconds)</label>
-        <Slider
-          className={styles.slider}
-          range
-          allowCross={false}
-          min={MIN_DURATION}
-          defaultValue={[DEFAULT_MIN_DURATION, DEFAULT_MAX_DURATION]}
-          step={SLIDER_STEP}
-          draggableTrack
-          value={[minDuration, maxDuration]}
-          onChange={onSliderChange}
+    <div className={clsx(isCompact && styles.compact, styles.container)}>
+      <label>Output Duration (in seconds)</label>
+      <Slider
+        className={styles.slider}
+        range
+        allowCross={false}
+        min={MIN_DURATION}
+        defaultValue={[DEFAULT_MIN_DURATION, DEFAULT_MAX_DURATION]}
+        step={SLIDER_STEP}
+        draggableTrack
+        value={[minDuration, maxDuration]}
+        onChange={onSliderChange}
+      />
+      <div className={styles.durationTextInputs}>
+        <label htmlFor="minDuration">Min</label>
+        <Input
+          id="minDuration"
+          type="number"
+          min="0"
+          max={maxDuration - MIN_DURATION_GAP}
+          placeholder="Min"
+          onChange={setMinDuration}
+          value={minDuration}
         />
-        <div className={styles.durationTextInputs}>
-          <label htmlFor="minDuration">Min</label>
-          <Input
-            id="minDuration"
-            type="number"
-            min="0"
-            max={maxDuration - MIN_DURATION_GAP}
-            placeholder="Min"
-            onChange={setMinDuration}
-            value={minDuration}
-          />
-          <label htmlFor="maxDuration">Max</label>
-          <Input
-            id="maxDuration"
-            type="number"
-            placeholder="Max"
-            onChange={setMaxDuration}
-            min={minDuration + MIN_DURATION_GAP}
-            value={maxDuration}
-          />
-        </div>
+        <label htmlFor="maxDuration">Max</label>
+        <Input
+          id="maxDuration"
+          type="number"
+          placeholder="Max"
+          onChange={setMaxDuration}
+          min={minDuration + MIN_DURATION_GAP}
+          value={maxDuration}
+        />
       </div>
-      <div className={styles.textModelsContainer}>
-        <label for="text_models">Text Model:</label>
-        <select
-          id="text_models"
-          onChange={(e) => setTextModel(e.target.value)}
-          defaultValue={textModel}
-          value={textModel}>
-          {textModels.map((model) => (
-            <option key={model} value={model}>
-              {model}
-            </option>
-          ))}
-        </select>
-      </div>
-      <Button disabled={disabled} isSecondary={isSecondary} onClick={onSubmit}>
-        {submitText}
-      </Button>
     </div>
   );
 }

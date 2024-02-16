@@ -20,7 +20,7 @@ import Head from 'next/head';
 import {useRouter} from 'next/router';
 import TranscriptsContainer from './TranscriptsContainer';
 import VideoReference from '../../components/VideoReference';
-import DurationInput from '../../components/DurationInput';
+import SummaryInputs from '../../components/SummaryInputs';
 import Store from '../../store/AdClipStore';
 import {getFilenameFromFullPath} from '../../fetchData/cloudStorage';
 
@@ -80,7 +80,7 @@ function TranscriptReview() {
             <p>Video Reference</p>
             <VideoReference ref={playerRef} />
             <div className={styles.nextButtonContainer}>
-              <DurationInput
+              <SummaryInputs
                 disabled={isTranscribingVideo}
                 onSubmit={summarizeTranscript}
                 submitText="Summarize Transcript"

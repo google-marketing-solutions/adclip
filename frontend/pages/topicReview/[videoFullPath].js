@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import Button from '../../components/Button';
 import Store from '../../store/AdClipStore';
 import styles from './TopicReview.module.sass';
@@ -26,7 +26,14 @@ function TranscriptTopicReview() {
   const store = Store.useStore();
   const isTranscribingVideo = store.get('isTranscribingVideo');
   const transcriptionError = store.get('transcriptionError');
+  const inputVideoFullPath = store.get('inputVideoFullPath');
   const playerRef = useRef(null);
+
+  useEffect(() => {
+    if (inputVideoFullPath != null) {
+      store.set('isTranscribingByTopic')(true);
+    }
+  }, [inputVideoFullPath]);
 
   const summarizeTranscript = () => {
     store.set('isSummarizingTranscript')(true);

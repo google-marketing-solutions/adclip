@@ -26,6 +26,7 @@ const initialState = {
   isFetchingFiles: false,
   isGeneratingVideos: false,
   isSummarizingTranscript: false,
+  isTranscribingByTopic: false,
   isTranscribingVideo: false,
   isTranscriptInEdit: false,
   language: 'en-US',
@@ -38,6 +39,8 @@ const initialState = {
   summarizedTranscripts: [],
   summaryMethod: 'duration',
   textModel: 'text-unicorn@001',
+  topicTranscriptionError: null,
+  transcriptWithTopics: [],
   transcriptionError: null,
 };
 

@@ -19,6 +19,7 @@ import {createFirebaseApp} from '../firebase/clientApp';
 import {
   callCutVideo,
   callTranscribeVideo,
+  callTranscribeByTopic,
   callSummarizeTranscript,
 } from '../fetchData/cloudFunctions';
 import {getFilenameFromFullPath} from '../fetchData/cloudStorage';
@@ -92,6 +93,33 @@ const effects = (store) => {
         })
         .finally(() => {
           store.set('isSummarizingTranscript')(false);
+        });
+    }
+  });
+
+  store.on('isTranscribingByTopic').subscribe((isTranscribingByTopic) => {
+    if (isTranscribingByTopic) {
+      const inputVideoFullPath = store.get('inputVideoFullPath');
+      const transcripts = store.get('reviewTranscripts');
+      callTranscribeByTopic({
+        filename: getFilenameFromFullPath(inputVideoFullPath),
+        transcript: transcripts,
+      })
+        .then((result) => {
+          const transcriptWithTopics = result.data;
+          // add checked:true to all lines
+          Object.keys(transcriptWithTopics).forEach((topic) => {
+            Object.keys(transcriptWithTopics[topic]).forEach((lineNumber) => {
+              transcriptWithTopics[topic][lineNumber].checked = true;
+            });
+          });
+          store.set('transcriptWithTopics')(transcriptWithTopics);
+        })
+        .catch((error) => {
+          store.set('topicTranscriptionError')(error);
+        })
+        .finally(() => {
+          store.set('isTranscribingByTopic')(false);
         });
     }
   });

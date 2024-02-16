@@ -27,13 +27,20 @@ import {getFilenameFromFullPath} from '../../fetchData/cloudStorage';
 function TranscriptReview() {
   const store = Store.useStore();
   const router = useRouter();
-  const videoFullPath = router.query.videoFullPath;
   const isTranscribingVideo = store.get('isTranscribingVideo');
   const transcriptionError = store.get('transcriptionError');
   const playerRef = useRef(null);
   const filename = store.get('inputVideoFilename');
+  const inputVideoFullPath = store.get('inputVideoFullPath');
 
   const title = `${filename != null && filename + ' | '}Transcript Review`;
+
+  useEffect(() => {
+    if (inputVideoFullPath != null) {
+      store.set('isTranscribingVideo')(true);
+    }
+  }, [inputVideoFullPath]);
+
   return (
     <>
       <Head>

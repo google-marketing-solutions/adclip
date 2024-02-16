@@ -35,10 +35,10 @@ const effects = (store) => {
 
   store.on('isTranscribingVideo').subscribe((isTranscribingVideo) => {
     if (isTranscribingVideo) {
-      const selectedVideoFullPath = store.get('selectedVideoFullPath');
+      const inputVideoFullPath = store.get('inputVideoFullPath');
       callTranscribeVideo({
-        full_path: selectedVideoFullPath,
-        file_name: getFilenameFromFullPath(selectedVideoFullPath),
+        full_path: inputVideoFullPath,
+        file_name: getFilenameFromFullPath(inputVideoFullPath),
       })
         .then((result) => {
           store.set('isTranscribingVideo')(false);

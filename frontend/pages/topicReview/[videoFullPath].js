@@ -24,6 +24,7 @@ import TranscriptsContainer from './TranscriptsContainer';
 
 function TranscriptTopicReview() {
   const store = Store.useStore();
+  const router = useRouter();
   const isTranscribingVideo = store.get('isTranscribingVideo');
   const transcriptionError = store.get('transcriptionError');
   const inputVideoFullPath = store.get('inputVideoFullPath');
@@ -36,11 +37,11 @@ function TranscriptTopicReview() {
   }, [inputVideoFullPath]);
 
   const summarizeTranscript = () => {
-    store.set('isSummarizingTranscript')(true);
-    router.push('/summaryReview/' + encodeURIComponent(selectedVideoFullPath));
+    store.set('isSummarizingByTopic')(true);
+    router.push('/summaryReview/' + encodeURIComponent(inputVideoFullPath));
 
     setTimeout(() => {
-      store.set('isSummarizingTranscript')(false);
+      store.set('isSummarizingByTopic')(false);
     }, 5000);
   };
 

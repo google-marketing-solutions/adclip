@@ -22,6 +22,8 @@ const CUT_VIDEO_FUNCTION = 'cut_video';
 const TRANSCRIBE_VIDEO_FUNCTION = 'transcribe_video';
 const TRANSCRIBE_BY_TOPIC_FUNCTION = 'summarize_transcript-topics-review';
 const SUMMARIZE_TRANSCRIPT_FUNCTION = 'summarize_transcript';
+const SUMMARIZE_BY_TOPIC_FUNCTION =
+  'summarize_transcript-topics-review-segments';
 const SIXTY_MINUTES_IN_MS = 3600000;
 
 const functions = getFunctions(APP);
@@ -41,6 +43,12 @@ export const callTranscribeByTopic = httpsCallable(
 export const callSummarizeTranscript = httpsCallable(
   functions,
   SUMMARIZE_TRANSCRIPT_FUNCTION,
+  {timeout: SIXTY_MINUTES_IN_MS},
+);
+
+export const callSummarizeByTopic = httpsCallable(
+  functions,
+  SUMMARIZE_BY_TOPIC_FUNCTION,
   {timeout: SIXTY_MINUTES_IN_MS},
 );
 

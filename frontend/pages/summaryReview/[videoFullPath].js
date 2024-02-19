@@ -30,6 +30,7 @@ function SummaryReview() {
   const store = Store.useStore();
   const areTimestampsInEdit = store.get('areTimestampsInEdit');
   const isSummarizingTranscript = store.get('isSummarizingTranscript');
+  const isSummarizingByTopic = store.get('isSummarizingByTopic');
   const transcripts = store.get('summarizedTranscripts');
   const filename = store.get('inputVideoFilename');
   const router = useRouter();
@@ -40,7 +41,7 @@ function SummaryReview() {
   const title = `${filename != null && filename + ' | '}Summary Review`;
 
   useEffect(() => {
-    if (inputVideoFullPath != null) {
+    if (inputVideoFullPath != null && !isSummarizingByTopic) {
       store.set('isSummarizingTranscript')(true);
     }
   }, [inputVideoFullPath]);
@@ -63,7 +64,12 @@ function SummaryReview() {
   };
 
   const resummarize = () => {
-    store.set('isSummarizingTranscript')(true);
+    const summaryMethod = store.get('summaryMethod');
+    if (summaryMethod === 'topic') {
+      router.push('/topicReview/' + encodeURIComponent(inputVideoFullPath));
+    } else {
+      store.set('isSummarizingTranscript')(true);
+    }
   };
 
   const togglePreview = () => {

@@ -21,6 +21,7 @@ import {
   callTranscribeVideo,
   callTranscribeByTopic,
   callSummarizeTranscript,
+  callSummarizeByTopic,
 } from '../fetchData/cloudFunctions';
 import {getFilenameFromFullPath} from '../fetchData/cloudStorage';
 
@@ -120,6 +121,33 @@ const effects = (store) => {
         })
         .finally(() => {
           store.set('isTranscribingByTopic')(false);
+        });
+    }
+  });
+
+  store.on('isSummarizingByTopic').subscribe((isSummarizingByTopic) => {
+    if (isSummarizingByTopic) {
+      const inputVideoFullPath = store.get('inputVideoFullPath');
+      const transcriptWithTopics = store.get('transcriptWithTopics');
+      const filteredTranscript = [];
+      Object.keys(transcriptWithTopics).forEach((topic) => {
+        Object.keys(transcriptWithTopics[topic]).forEach((lineNumber) => {
+          if (transcriptWithTopics[topic][lineNumber].checked)
+            filteredTranscript.push(transcriptWithTopics[topic][lineNumber]);
+        });
+      });
+      callSummarizeByTopic({
+        filename: getFilenameFromFullPath(inputVideoFullPath),
+        transcript: filteredTranscript,
+      })
+        .then((result) => {
+          store.set('summarizedTranscripts')(result.data.summarized_transcript);
+        })
+        .catch((error) => {
+          store.set('error')(error);
+        })
+        .finally(() => {
+          store.set('isSummarizingByTopic')(false);
         });
     }
   });

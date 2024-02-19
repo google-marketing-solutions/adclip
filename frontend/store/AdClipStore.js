@@ -25,6 +25,7 @@ const initialState = {
   inputVideoFilename: null,
   isFetchingFiles: false,
   isGeneratingVideos: false,
+  isSummarizingByTopic: false,
   isSummarizingTranscript: false,
   isTranscribingByTopic: false,
   isTranscribingVideo: false,

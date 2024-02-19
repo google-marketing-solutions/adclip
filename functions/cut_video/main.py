@@ -63,9 +63,38 @@ def upload_blob(source_file_name: str, destination_blob_name: str) -> None:
   os.remove(source_file_name)
 
 
+def merge_overlapping_clips(clips: list) -> list:
+  """Merges overlapping clips
+
+  Checks each clip if their start and end times overlaps. If they do, they are
+  merged into a single clip.
+
+  Args:
+      clips: The list of transcript dict with startTime and endTime
+
+  Returns:
+      The merged list of clips
+  """
+
+  if not clips:
+    return []
+
+  output = [clips[0]]
+
+  for index in range(1, len(clips)):
+    if clips[index]['startTime'] <= output[-1]['endTime']:
+      output[-1]['endTime'] = clips[index]['endTime']
+    else:
+      output.append(clips[index])
+
+  return output
+
+
 def clip_video(video_path: str, file_name: str, segments: list) -> any:
   original_clip = VideoFileClip(video_path)
   new_clip = None
+
+  segments = merge_overlapping_clips(segments)
 
   for segment in segments:
     sub_clip = original_clip.subclip(segment['startTime'], segment['endTime'])

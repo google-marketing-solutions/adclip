@@ -82,7 +82,9 @@ function TranscriptsContainer({playerRef}) {
               </div>
               {Object.entries(transcriptWithTopics[topic]).map(
                 ([lineNumber, {checked, startTime, endTime, text}]) => (
-                  <div className={clsx(styles.transcriptRow, styles.withTopic)}>
+                  <div
+                    key={lineNumber}
+                    className={clsx(styles.transcriptRow, styles.withTopic)}>
                     <input
                       defaultChecked={true}
                       className={styles.checkbox}

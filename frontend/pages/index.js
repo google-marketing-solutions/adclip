@@ -192,6 +192,7 @@ export default function Home() {
               <select onChange={(e) => setLanguage(e.target.value)}>
                 {Object.keys(languages).map((languageCode) => (
                   <option
+                    key={languageCode}
                     value={languageCode}
                     selected={languageCode === language}>
                     {languages[languageCode]}

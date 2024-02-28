@@ -18,7 +18,9 @@ import {getFunctions, httpsCallable} from 'firebase/functions';
 import {createFirebaseApp} from '../firebase/clientApp';
 
 const APP = createFirebaseApp();
+const CUT_VIDEO_FUNCTION = 'cut_video';
 const TRANSCRIBE_VIDEO_FUNCTION = 'transcribe_video';
+const SUMMARIZE_TRANSCRIPT_FUNCTION = 'summarize_transcript';
 const SIXTY_MINUTES_IN_MS = 3600000;
 
 const functions = getFunctions(APP);
@@ -28,3 +30,13 @@ export const callTranscribeVideo = httpsCallable(
   TRANSCRIBE_VIDEO_FUNCTION,
   {timeout: SIXTY_MINUTES_IN_MS},
 );
+
+export const callSummarizeTranscript = httpsCallable(
+  functions,
+  SUMMARIZE_TRANSCRIPT_FUNCTION,
+  {timeout: SIXTY_MINUTES_IN_MS},
+);
+
+export const callCutVideo = httpsCallable(functions, CUT_VIDEO_FUNCTION, {
+  timeout: SIXTY_MINUTES_IN_MS,
+});

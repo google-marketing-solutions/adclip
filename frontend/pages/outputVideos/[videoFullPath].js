@@ -21,14 +21,22 @@ import {getFilenameFromFullPath} from '../../fetchData/cloudStorage';
 import Store from '../../store/AdClipStore';
 import Button from '../../components/Button';
 import Video from '../../components/Video';
+import styles from './index.module.sass';
 
 function OutputVideos() {
   const store = Store.useStore();
   const router = useRouter();
   const isGeneratingVideos = store.get('isGeneratingVideos');
   const filename = store.get('inputVideoFilename');
+  const videos = store.get('outputVideos');
   const title = `${filename != null && filename + ' | '}Output Videos`;
+  const transcripts = store.get('summarizedTranscripts');
 
+  const totalDuration = transcripts.reduce(
+    (duration, transcript) =>
+      duration + transcript.endTime - transcript.startTime,
+    0,
+  );
   const goToHomePage = () => {
     router.push('/');
   };
@@ -45,9 +53,29 @@ function OutputVideos() {
         <div className="loadingEllipsis">Generating video</div>
       )}
 
-      <div style={{width: '480px'}}>
-        <Video isLoading={isGeneratingVideos} name={filename} />
-      </div>
+      {videos.length > 1 ? (
+        <div className={styles.videoGrid}>
+          {videos.map((video) => (
+            <div className={styles.videoItem} key={video.fullPath}>
+              <Video
+                isLoading={isGeneratingVideos}
+                source={video.url}
+                duration={totalDuration}
+                name={filename}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className={styles.videoItem}>
+          <Video
+            isLoading={isGeneratingVideos}
+            source={videos.length >= 1 ? videos[0].url : null}
+            duration={totalDuration}
+            name={filename}
+          />
+        </div>
+      )}
 
       <div style={{marginTop: '2rem'}}>
         <Button onClick={goToHomePage}>Start Over</Button>

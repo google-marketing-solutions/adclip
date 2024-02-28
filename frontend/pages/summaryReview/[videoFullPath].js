@@ -36,7 +36,14 @@ function SummaryReview() {
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewCurrentTime, setPreviewCurrentTime] = useState(-1);
   const playerRef = useRef(null);
+  const inputVideoFullPath = store.get('inputVideoFullPath');
   const title = `${filename != null && filename + ' | '}Summary Review`;
+
+  useEffect(() => {
+    if (inputVideoFullPath != null) {
+      store.set('isSummarizingTranscript')(true);
+    }
+  }, [inputVideoFullPath]);
 
   const totalDuration = transcripts.reduce(
     (duration, transcript) =>

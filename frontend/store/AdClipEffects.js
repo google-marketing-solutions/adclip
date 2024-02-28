@@ -16,7 +16,11 @@
 
 import {getDownloadURL, getStorage, ref, uploadBytes} from 'firebase/storage';
 import {createFirebaseApp} from '../firebase/clientApp';
-import {callTranscribeVideo} from '../fetchData/cloudFunctions';
+import {
+  callCutVideo,
+  callTranscribeVideo,
+  callSummarizeTranscript,
+} from '../fetchData/cloudFunctions';
 import {getFilenameFromFullPath} from '../fetchData/cloudStorage';
 
 const INPUT_VIDEOS_FOLDER = 'videos/';
@@ -35,10 +39,10 @@ const effects = (store) => {
 
   store.on('isTranscribingVideo').subscribe((isTranscribingVideo) => {
     if (isTranscribingVideo) {
-      const selectedVideoFullPath = store.get('selectedVideoFullPath');
+      const inputVideoFullPath = store.get('inputVideoFullPath');
       callTranscribeVideo({
-        full_path: selectedVideoFullPath,
-        file_name: getFilenameFromFullPath(selectedVideoFullPath),
+        full_path: inputVideoFullPath,
+        file_name: getFilenameFromFullPath(inputVideoFullPath),
       })
         .then((result) => {
           store.set('isTranscribingVideo')(false);
@@ -58,6 +62,73 @@ const effects = (store) => {
       getDownloadURL(ref(getStorage(), videoFullPath)).then((url) => {
         store.set('inputVideoURL')(url);
       });
+    }
+  });
+
+  store.on('isSummarizingTranscript').subscribe((isSummarizingTranscript) => {
+    if (isSummarizingTranscript) {
+      const inputVideoFullPath = store.get('inputVideoFullPath');
+      const transcripts = store.get('reviewTranscripts');
+      const minDuration = store.get('minDuration');
+      const maxDuration = store.get('maxDuration');
+      callSummarizeTranscript({
+        filename: getFilenameFromFullPath(inputVideoFullPath),
+        transcript: transcripts,
+        min_duration: minDuration,
+        max_duration: maxDuration,
+      })
+        .then((result) => {
+          const summarizedTranscript = result.data.summarized_transcript;
+          store.set('summarizedTranscripts')(summarizedTranscript);
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          store.set('isSummarizingTranscript')(false);
+        });
+    }
+  });
+
+  store.on('isGeneratingVideos').subscribe((isGeneratingVideos) => {
+    if (isGeneratingVideos) {
+      const inputVideoFullPath = store.get('inputVideoFullPath');
+      const summarizedTranscripts = store.get('summarizedTranscripts');
+      const inputVideoUrl = store.get('inputVideoURL');
+      callCutVideo({
+        fileName: getFilenameFromFullPath(inputVideoFullPath),
+        videoUrl: inputVideoUrl,
+        transcript: summarizedTranscripts,
+      })
+        .then((result) => {
+          const {full_path: fullPath, full_path_vertical: fullPathVertical} =
+            result.data;
+          const promises = [
+            getDownloadURL(ref(getStorage(), fullPath)).then((url) => ({
+              url,
+              fullPath,
+            })),
+          ];
+          if (fullPathVertical) {
+            promises.push(
+              getDownloadURL(ref(getStorage(), fullPathVertical)).then(
+                (url) => ({
+                  url,
+                  fullPath: fullPathVertical,
+                }),
+              ),
+            );
+          }
+          Promise.all(promises).then((outputVideos) => {
+            store.set('outputVideos')(outputVideos);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          store.set('isGeneratingVideos')(false);
+        });
     }
   });
 

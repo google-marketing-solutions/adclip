@@ -43,6 +43,12 @@ const humanFileSize = (bytes) => {
   return `${(bytes / 1099511627776).toFixed(2)} ${sizes[4]}`;
 };
 
+const languages = {
+  'en-US': 'English',
+  'th-TH': 'Thai',
+  'zh-TW': 'Chinese (Traditional)',
+};
+
 export default function Home() {
   const store = Store.useStore();
   const {loadingUser, user} = useUser();
@@ -52,6 +58,8 @@ export default function Home() {
   const selectedVideoFullPath = store.get('selectedVideoFullPath');
   const [filenameFilter, setFilenameFilter] = useState('');
   const uploadInputRef = useRef();
+  const language = store.get('language');
+  const setLanguage = store.set('language');
 
   useEffect(() => {
     if (loadingUser || user == null) return;
@@ -113,8 +121,8 @@ export default function Home() {
       <main className={styles.mainContainer}>
         <h2>Select a video file</h2>
         <p>
-          AdClip currently accepts videos with voice-over in English (maximum
-          2250 words).
+          AdClip currently accepts videos with voice-over in English, Thai, and
+          Traditional Chinese (maximum 2250 words).
         </p>
         <div className={styles.selectContainer}>
           <div className={styles.toolbar}>
@@ -178,7 +186,19 @@ export default function Home() {
               </tbody>
             </table>
           </div>
-          <div className={styles.startButton}>
+          <div className={styles.actionContainer}>
+            <div className={styles.languageContainer}>
+              <label>Video language:</label>
+              <select onChange={(e) => setLanguage(e.target.value)}>
+                {Object.keys(languages).map((languageCode) => (
+                  <option
+                    value={languageCode}
+                    selected={languageCode === language}>
+                    {languages[languageCode]}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Button
               onClick={transcribeVideo}
               disabled={selectedVideoFullPath == null}>

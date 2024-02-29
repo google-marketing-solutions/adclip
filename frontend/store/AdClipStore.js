@@ -28,6 +28,7 @@ const initialState = {
   isSummarizingTranscript: false,
   isTranscribingVideo: false,
   isTranscriptInEdit: false,
+  language: 'en-US',
   maxDuration: 40,
   minDuration: 20,
   outputVideos: [],

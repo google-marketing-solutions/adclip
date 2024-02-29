@@ -30,7 +30,7 @@ function TimestampButton({playerRef, time}) {
 function TranscriptsContainer({playerRef}) {
   const store = Store.useStore();
   const transcriptWithTopics = store.get('transcriptWithTopics');
-  const isTranscribingVideo = store.get('isTranscribingVideo');
+  const isTranscribingByTopic = store.get('isTranscribingByTopic');
   const setTranscriptWithTopics = store.set('transcriptWithTopics');
 
   const toggle = (topic, lineNumber) => {
@@ -47,18 +47,18 @@ function TranscriptsContainer({playerRef}) {
 
   return (
     <div className={styles.transcriptsContainer}>
-      {isTranscribingVideo && (
+      {isTranscribingByTopic && (
         <p className="loadingEllipsis">The topics are being extracted</p>
       )}
       <div className={clsx(styles.transcriptBody, styles.withTopic)}>
-        {isTranscribingVideo &&
+        {isTranscribingByTopic &&
           new Array(8)
             .fill({})
             .map((transcript, index) => (
               <TranscriptRow
                 canKeepTranscripts
                 isInteractive
-                isLoading={isTranscribingVideo}
+                isLoading={isTranscribingByTopic}
                 index={index}
                 playerRef={playerRef}
                 key={transcript.text}
@@ -66,7 +66,7 @@ function TranscriptsContainer({playerRef}) {
                 transcriptKey="reviewTranscripts"
               />
             ))}
-        {!isTranscribingVideo &&
+        {!isTranscribingByTopic &&
           Object.keys(transcriptWithTopics).map((topic) => (
             <>
               <div className={styles.transcriptTopic}>

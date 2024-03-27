@@ -23,7 +23,7 @@ import {useRouter} from 'next/navigation';
 import {createFirebaseApp} from '../../firebase/clientApp';
 import dynamic from 'next/dynamic';
 
-const StyledFirebaseAuth = dynamic(() => import('./StyledFirebaseAuth'), {
+const FirebaseUIReact = dynamic(() => import('firebaseui-react'), {
   ssr: false,
 });
 
@@ -58,7 +58,7 @@ export default function SignIn() {
   return (
     <div style={{textAlign: 'center'}}>
       <p>Please sign-in:</p>
-      <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
+      <FirebaseUIReact auth={firebase.auth()} config={uiConfig} />
     </div>
   );
 }

@@ -122,7 +122,7 @@ function SummaryReview() {
                       onClick={() => {
                         store.set('areTimestampsInEdit')(!areTimestampsInEdit);
                       }}>
-                      {!areTimestampsInEdit ? 'Adjust Timestamps' : 'Save'}
+                      {!areTimestampsInEdit ? 'Edit Clips' : 'Save'}
                     </Button>
                   )}
                   <Button
@@ -132,7 +132,13 @@ function SummaryReview() {
                     {isPreviewing ? 'Stop Preview' : 'Preview'}
                   </Button>
                 </div>
-                <header className={clsx(styles.header, styles.transcriptRow)}>
+                <header
+                  className={clsx(
+                    styles.header,
+                    styles.transcriptRow,
+                    areTimestampsInEdit && styles.inEdit,
+                  )}>
+                  <span></span>
                   <span>Start</span>
                   <span>End</span>
                   <span>Transcript</span>
@@ -152,6 +158,7 @@ function SummaryReview() {
                   playerRef={playerRef}
                   transcript={transcript}
                   transcriptKey="summarizedTranscripts"
+                  withClipButtons
                 />
               ),
             )}

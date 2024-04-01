@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import 'video-react/dist/video-react.css'; // import css
 import {BigPlayButton, Player} from 'video-react';
 import VideoPlayerShimmer from './VideoPlayerShimmer';
 import usePrevious from '../hooks/usePrevious';
 import Button from './Button';
+import styles from './Video.module.sass';
 
-function Video({name, isLoading, source}) {
+const defaultCopyLinkText = 'Copy Link';
+
+function Video({name, isLoading, fullPath, source}) {
   const previousSource = usePrevious(source);
   const playerRef = useRef(null);
+  const [copyLinkText, setCopyLinkText] = useState(defaultCopyLinkText);
 
   useEffect(() => {
     if (previousSource !== source && playerRef && playerRef.current) {
@@ -48,15 +52,29 @@ function Video({name, isLoading, source}) {
     download(source, name);
   };
 
+  const copyLink = () => {
+    const encoded_path = encodeURIComponent(fullPath);
+    const url = `${window.location.origin}/view/${encoded_path}`;
+    navigator.clipboard.writeText(url);
+
+    setCopyLinkText('Copied!');
+    setTimeout(() => {
+      setCopyLinkText(defaultCopyLinkText);
+    }, 3000);
+  };
+
   return (
-    <div style={{border: '1px solid black'}}>
+    <div className={styles.videoContainer}>
       <Player ref={playerRef}>
         <BigPlayButton position="center" />
         <source src={source} />
       </Player>
-      <div style={{padding: '1rem'}}>
+      <div className={styles.buttonsContainer}>
         <Button onClick={downloadVideo} isSecondary>
           Download
+        </Button>
+        <Button onClick={copyLink} isSecondary>
+          {copyLinkText}
         </Button>
       </div>
     </div>

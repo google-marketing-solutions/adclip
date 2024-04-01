@@ -16,15 +16,16 @@
 
 import {useEffect, useRef, useState} from 'react';
 import styles from './index.module.sass';
-import Store from '../../store/AdClipStore';
+import Store from '../../../store/AdClipStore';
 import Head from 'next/head';
 import {useRouter} from 'next/router';
-import {getFilenameFromFullPath} from '../../fetchData/cloudStorage';
+import {getFilenameFromFullPath} from '../../../fetchData/cloudStorage';
 import clsx from 'clsx';
-import TranscriptRow from '../../components/TranscriptRow';
-import VideoReference from '../../components/VideoReference';
-import Button from '../../components/Button';
-import SummaryInputs from '../../components/SummaryInputs';
+import TranscriptRow from '../../../components/TranscriptRow';
+import VideoReference from '../../../components/VideoReference';
+import Button from '../../../components/Button';
+import SummaryInputs from '../../../components/SummaryInputs';
+import {SUMMARIZE_BY_TOPIC} from '../../topicReview/[videoFullPath]';
 
 function SummaryReview() {
   const store = Store.useStore();
@@ -40,12 +41,25 @@ function SummaryReview() {
   const playerRef = useRef(null);
   const inputVideoFullPath = store.get('inputVideoFullPath');
   const title = `${filename != null && filename + ' | '}Summary Review`;
+  const transcriptWithTopics = store.get('transcriptWithTopics');
 
   useEffect(() => {
-    if (inputVideoFullPath != null && !isSummarizingByTopic) {
+    if (!router.isReady) return;
+    const {summarizeBy} = router.query;
+    if (inputVideoFullPath != null && summarizeBy !== SUMMARIZE_BY_TOPIC) {
       store.set('isSummarizingTranscript')(true);
+    } else if (
+      inputVideoFullPath != null &&
+      summarizeBy === SUMMARIZE_BY_TOPIC
+    ) {
+      // Redirect to topicReview if there are no topics selected
+      if (transcriptWithTopics.length === 0) {
+        router.push(
+          '/topicReview/' + encodeURIComponent(store.get('inputVideoFullPath')),
+        );
+      }
     }
-  }, [inputVideoFullPath]);
+  }, [inputVideoFullPath, router.isReady, router.query]);
 
   const totalDuration = transcripts.reduce(
     (duration, transcript) =>
@@ -74,6 +88,7 @@ function SummaryReview() {
     setIsPreviewing(!isPreviewing);
   };
 
+  const isSummarizing = isSummarizingTranscript || isSummarizingByTopic;
   return (
     <>
       <Head>
@@ -82,14 +97,18 @@ function SummaryReview() {
 
       <div className={styles.pageContainer}>
         <h2>Review Summarized Transcript</h2>
-        <p>
-          Here is the summarized transcript by AI. Click on the Start and End
-          buttons to review each segment and edit the time if needed.
-        </p>
-        <h4>Total Duration: {totalDuration.toFixed(2)}s</h4>
+        {!isSummarizing && (
+          <>
+            <p>
+              Here is the summarized transcript by AI. Click on the Start and
+              End buttons to review each segment and edit the time if needed.
+            </p>
+            <h4>Total Duration: {totalDuration.toFixed(2)}s</h4>
+          </>
+        )}
         <main className={styles.mainContainer}>
           <section className={styles.transcriptContainer}>
-            {isSummarizingTranscript ? (
+            {isSummarizing ? (
               <p className="loadingEllipsis">
                 The transcript is being summarized
               </p>
@@ -99,7 +118,7 @@ function SummaryReview() {
                   {!isPreviewing && (
                     <Button
                       isSecondary
-                      disabled={isSummarizingTranscript}
+                      disabled={isSummarizing}
                       onClick={() => {
                         store.set('areTimestampsInEdit')(!areTimestampsInEdit);
                       }}>
@@ -108,7 +127,7 @@ function SummaryReview() {
                   )}
                   <Button
                     isSecondary
-                    disabled={isSummarizingTranscript}
+                    disabled={isSummarizing}
                     onClick={togglePreview}>
                     {isPreviewing ? 'Stop Preview' : 'Preview'}
                   </Button>
@@ -120,23 +139,22 @@ function SummaryReview() {
                 </header>
               </>
             )}
-            {(isSummarizingTranscript
-              ? new Array(7).fill({})
-              : transcripts
-            ).map((transcript, index) => (
-              <TranscriptRow
-                isHighlighted={
-                  transcript.startTime <= previewCurrentTime &&
-                  transcript.endTime > previewCurrentTime
-                }
-                isLoading={isSummarizingTranscript}
-                index={index}
-                key={transcript.text}
-                playerRef={playerRef}
-                transcript={transcript}
-                transcriptKey="summarizedTranscripts"
-              />
-            ))}
+            {(isSummarizing ? new Array(7).fill({}) : transcripts).map(
+              (transcript, index) => (
+                <TranscriptRow
+                  isHighlighted={
+                    transcript.startTime <= previewCurrentTime &&
+                    transcript.endTime > previewCurrentTime
+                  }
+                  isLoading={isSummarizing}
+                  index={index}
+                  key={transcript.text}
+                  playerRef={playerRef}
+                  transcript={transcript}
+                  transcriptKey="summarizedTranscripts"
+                />
+              ),
+            )}
           </section>
           <section>
             <p>Video Reference</p>
@@ -144,7 +162,7 @@ function SummaryReview() {
               <div>
                 {/* added a div to force rerendering of Player */}
                 <VideoReference
-                  hasControls={false}
+                  hasControls
                   isAutoplay
                   onTimeUpdateCallback={onPreviewTimeUpdate}
                   ref={playerRef}
@@ -159,7 +177,7 @@ function SummaryReview() {
         <div className={styles.buttonSectionsContainer}>
           <section>
             <p>Looks good?</p>
-            <Button onClick={generateVideos} disabled={isSummarizingTranscript}>
+            <Button onClick={generateVideos} disabled={isSummarizing}>
               Generate Video
             </Button>
           </section>
@@ -182,7 +200,7 @@ function SummaryReview() {
             </p>
             <input
               className={styles.promptInput}
-              disabled={isSummarizingTranscript || isSummarizingByTopic}
+              disabled={isSummarizing}
               type="text"
               placeholder="(Optional) Add a prompt"
               value={prompt}
@@ -191,7 +209,7 @@ function SummaryReview() {
               }}
             />
             <SummaryInputs
-              disabled={isSummarizingTranscript}
+              disabled={isSummarizing}
               onSubmit={resummarize}
               submitText="Resummarize"
               isSecondary

@@ -37,7 +37,7 @@ function NavigationBar() {
     case '/transcribeVideo/[videoFullPath]':
       currentStep = 1;
       break;
-    case '/summaryReview/[videoFullPath]':
+    case '/summaryReview/[videoFullPath]/[summarizeBy]':
       currentStep = 2;
       break;
     case '/outputVideos/[videoFullPath]':

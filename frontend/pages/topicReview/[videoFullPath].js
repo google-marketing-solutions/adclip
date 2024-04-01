@@ -22,6 +22,8 @@ import {useRouter} from 'next/router';
 import VideoReference from '../../components/VideoReference';
 import TranscriptsContainer from './TranscriptsContainer';
 
+export const SUMMARIZE_BY_TOPIC = 'topic';
+
 function TranscriptTopicReview() {
   const store = Store.useStore();
   const router = useRouter();
@@ -38,12 +40,18 @@ function TranscriptTopicReview() {
 
   const summarizeTranscript = () => {
     store.set('isSummarizingByTopic')(true);
-    router.push('/summaryReview/' + encodeURIComponent(inputVideoFullPath));
-
-    setTimeout(() => {
-      store.set('isSummarizingByTopic')(false);
-    }, 5000);
+    router.push(
+      '/summaryReview/' +
+        encodeURIComponent(inputVideoFullPath) +
+        '/' +
+        SUMMARIZE_BY_TOPIC,
+    );
   };
+
+  const transcriptWithTopics = store.get('transcriptWithTopics');
+  const haveSelectedTranscript = Object.values(transcriptWithTopics).some(
+    (lines) => Object.values(lines).some((line) => line.checked),
+  );
 
   return (
     <div className={styles.transcriptReviewContainer}>
@@ -74,7 +82,7 @@ function TranscriptTopicReview() {
           <VideoReference ref={playerRef} />
           <div className={styles.nextButtonContainer}>
             <Button
-              disabled={isTranscribingVideo}
+              disabled={isTranscribingVideo || !haveSelectedTranscript}
               isSecondary={false}
               onClick={summarizeTranscript}>
               Summarize Transcript

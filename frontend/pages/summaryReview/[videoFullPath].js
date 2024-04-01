@@ -65,12 +65,7 @@ function SummaryReview() {
   };
 
   const resummarize = () => {
-    const summaryMethod = store.get('summaryMethod');
-    if (summaryMethod === 'topic') {
-      router.push('/topicReview/' + encodeURIComponent(inputVideoFullPath));
-    } else {
-      store.set('isSummarizingTranscript')(true);
-    }
+    store.set('isSummarizingTranscript')(true);
   };
 
   const togglePreview = () => {

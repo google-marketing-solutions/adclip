@@ -39,7 +39,6 @@ const initialState = {
   selectedFilesForUpload: [],
   selectedVideoFullPath: null,
   summarizedTranscripts: [],
-  summaryMethod: 'duration',
   textModel: 'text-unicorn@001',
   topicTranscriptionError: null,
   transcriptWithTopics: [],

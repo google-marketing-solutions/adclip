@@ -31,7 +31,6 @@ function TranscriptReview() {
   const transcriptionError = store.get('transcriptionError');
   const playerRef = useRef(null);
   const filename = store.get('inputVideoFilename');
-  const summaryMethod = store.get('summaryMethod');
   const inputVideoFullPath = store.get('inputVideoFullPath');
 
   const title = `${filename != null && filename + ' | '}Transcript Review`;
@@ -43,11 +42,7 @@ function TranscriptReview() {
   }, [inputVideoFullPath]);
 
   const summarizeTranscript = () => {
-    if (summaryMethod === 'topic') {
-      router.push('/topicReview/' + encodeURIComponent(inputVideoFullPath));
-    } else {
-      router.push('/summaryReview/' + encodeURIComponent(inputVideoFullPath));
-    }
+    router.push('/summaryReview/' + encodeURIComponent(inputVideoFullPath));
   };
   return (
     <>

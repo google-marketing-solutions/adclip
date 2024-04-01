@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {useRouter} from 'next/router';
 import styles from './SummaryInputs.module.sass';
 import Store from '../store/AdClipStore';
 import Button from './Button';
@@ -30,12 +31,10 @@ function SummaryInputs({
   submitText,
 }) {
   const store = Store.useStore();
-  const summaryMethod = store.get('summaryMethod');
+  const router = useRouter();
+  const inputVideoFullPath = store.get('inputVideoFullPath');
   const textModel = store.get('textModel');
   const setTextModel = store.set('textModel');
-  const selectRadioButton = (e) => {
-    store.set('summaryMethod')(e.currentTarget.value);
-  };
 
   const textModelsSelection = (
     <div className={styles.textModelsContainer}>
@@ -54,37 +53,22 @@ function SummaryInputs({
     </div>
   );
 
+  const summarizeByTopic = () => {
+    router.push('/topicReview/' + encodeURIComponent(inputVideoFullPath));
+  };
+
   return (
-    <div className={clsx(isCompact && styles.summarizeActionContainer)}>
-      <div className={styles.summarizeMethodsContainer}>
-        Summary Method:
-        <span>
-          <input
-            id="duration_summary"
-            type="radio"
-            name="summary_method"
-            value="duration"
-            checked={summaryMethod === 'duration'}
-            onChange={selectRadioButton}
-          />
-          <label for="duration_summary">Duration</label>
-        </span>
-        <span>
-          <input
-            id="topic_summary"
-            type="radio"
-            name="summary_method"
-            value="topic"
-            checked={summaryMethod === 'topic'}
-            onChange={selectRadioButton}
-          />
-          <label for="topic_summary">Topic</label>
-        </span>
-      </div>
-      {summaryMethod === 'duration' && <DurationInput isCompact={isCompact} />}
+    <div
+      className={clsx(
+        styles.summarizeActionContainer,
+        isCompact && styles.compact,
+      )}>
       {textModelsSelection}
       <Button disabled={disabled} isSecondary={isSecondary} onClick={onSubmit}>
         {submitText}
+      </Button>
+      <Button disabled={disabled} isSecondary onClick={summarizeByTopic}>
+        Summarize by Topic
       </Button>
     </div>
   );

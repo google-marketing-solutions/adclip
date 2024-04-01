@@ -31,6 +31,7 @@ function SummaryReview() {
   const areTimestampsInEdit = store.get('areTimestampsInEdit');
   const isSummarizingTranscript = store.get('isSummarizingTranscript');
   const isSummarizingByTopic = store.get('isSummarizingByTopic');
+  const prompt = store.get('prompt');
   const transcripts = store.get('summarizedTranscripts');
   const filename = store.get('inputVideoFilename');
   const router = useRouter();
@@ -169,6 +170,31 @@ function SummaryReview() {
           </section>
           <div className={styles.divider} />
           <section>
+            <p>
+              If not, you can help the AI summarize the transcript by adding a
+              prompt that asks it
+              <br />
+              to focus on the main points of the transcript and include specific
+              details.
+            </p>
+            <p>
+              <a
+                href="https://developers.generativeai.google/guide/prompt_best_practices"
+                target="_blank"
+                rel="noopener noreferrer">
+                Prompting Guide
+              </a>
+            </p>
+            <input
+              className={styles.promptInput}
+              disabled={isSummarizingTranscript || isSummarizingByTopic}
+              type="text"
+              placeholder="(Optional) Add a prompt"
+              value={prompt}
+              onChange={(e) => {
+                store.set('prompt')(e.target.value);
+              }}
+            />
             <SummaryInputs
               disabled={isSummarizingTranscript}
               onSubmit={resummarize}

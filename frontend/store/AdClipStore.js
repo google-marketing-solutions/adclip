@@ -34,6 +34,7 @@ const initialState = {
   maxDuration: 40,
   minDuration: 20,
   outputVideos: [],
+  prompt: '',
   reviewTranscripts: [],
   selectedFilesForUpload: [],
   selectedVideoFullPath: null,

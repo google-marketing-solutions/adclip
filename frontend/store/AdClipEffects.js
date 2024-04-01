@@ -76,6 +76,7 @@ const effects = (store) => {
       const language = store.get('language');
       const minDuration = store.get('minDuration');
       const maxDuration = store.get('maxDuration');
+      const prompt = store.get('prompt');
       const textModel = store.get('textModel');
       callSummarizeTranscript({
         filename: getFilenameFromFullPath(inputVideoFullPath),
@@ -84,6 +85,7 @@ const effects = (store) => {
         max_duration: maxDuration,
         language_code: language,
         model_name: textModel,
+        prompt,
       })
         .then((result) => {
           const summarizedTranscript = result.data.summarized_transcript;

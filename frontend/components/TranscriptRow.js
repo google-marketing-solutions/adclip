@@ -75,7 +75,32 @@ function TimestampButton({index, objectKey, playerRef, transcriptKey}) {
   return <button onClick={changePlayerTime}>{time}</button>;
 }
 
+function KeepTranscriptCheckbox({index, transcript, transcriptKey}) {
+  const store = Store.useStore();
+
+  const toggle = () => {
+    const transcripts = store.get(transcriptKey);
+    const newShouldKeepValue = transcripts[index].shouldKeep !== true;
+    transcripts[index].shouldKeep = newShouldKeepValue;
+    transcripts[index].words = transcripts[index].words.map((word) => ({
+      ...word,
+      shouldKeep: newShouldKeepValue,
+    }));
+    store.set(transcriptKey)(transcripts);
+  };
+
+  return (
+    <input
+      defaultChecked={transcript.shouldKeep}
+      className={styles.checkbox}
+      onChange={toggle}
+      type="checkbox"
+    />
+  );
+}
+
 function TranscriptRow({
+  canKeepTranscripts = false,
   index,
   isHighlighted = false,
   isLoading,
@@ -94,7 +119,15 @@ function TranscriptRow({
   }
 
   return (
-    <div className={styles.transcriptRow}>
+    <div
+      className={clsx(
+        styles.transcriptRow,
+        canKeepTranscripts && styles.withCheckbox,
+      )}>
+      {canKeepTranscripts && (
+        <KeepTranscriptCheckbox transcript={transcript.text} index={index}
+        transcriptKey={transcriptKey} />
+      )}
       <TimestampButton
         index={index}
         objectKey="startTime"

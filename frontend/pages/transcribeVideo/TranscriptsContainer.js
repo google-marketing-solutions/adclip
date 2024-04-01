@@ -43,6 +43,7 @@ function TranscriptsContainer({playerRef}) {
             </Button>
           </div>
           <div className={clsx(styles.header, styles.transcriptRow)}>
+            <span>Keep</span>
             <span>Start</span>
             <span>End</span>
             <span>Transcript</span>
@@ -53,6 +54,7 @@ function TranscriptsContainer({playerRef}) {
         {(isTranscribingVideo ? new Array(8).fill({}) : transcripts).map(
           (transcript, index) => (
             <TranscriptRow
+              canKeepTranscripts
               isLoading={isTranscribingVideo}
               index={index}
               key={transcript.text}

@@ -106,13 +106,16 @@ def match_with_video_shots(video_shots: list,
     end_time = max(line['endTime'], video_shot['end_time'])
 
     while (
-        word_index < len(words) - 2
+        word_index < len(words) - 1
         and words[word_index]['startTime'] < line['endTime']
     ):
       word_index += 1
     next_word = words[word_index]
     if next_word['endTime'] != line['endTime']:
       end_time = min(end_time, next_word['startTime'])
+
+    if index == len(transcript) - 1:
+      end_time = video_shots[-1]['end_time']
 
     transcript[index]['endTime'] = end_time
     transcript[index]['duration'] = end_time - start_time

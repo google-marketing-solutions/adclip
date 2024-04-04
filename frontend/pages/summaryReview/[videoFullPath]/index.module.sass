@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import '../../styles/_colors.sass'
+@import '../../../styles/_colors.sass'
 
 .pageContainer
   width: min(100%, 95rem)
@@ -42,7 +42,10 @@
   margin-bottom: 1rem
   gap: 0.5rem
   display: grid
-  grid-template-columns: 3rem 3rem 1fr
+  grid-template-columns: 3rem 3rem 3rem 1fr
+
+  &.inEdit
+    grid-template-columns: 6rem 3.5rem 3.5rem 1fr
 
 .buttonSectionsContainer
   display: flex

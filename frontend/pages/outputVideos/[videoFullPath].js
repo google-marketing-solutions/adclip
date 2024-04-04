@@ -22,6 +22,7 @@ import Store from '../../store/AdClipStore';
 import Button from '../../components/Button';
 import Video from '../../components/Video';
 import styles from './index.module.sass';
+import clsx from 'clsx';
 
 function OutputVideos() {
   const store = Store.useStore();
@@ -50,7 +51,9 @@ function OutputVideos() {
       <h2>Output Videos</h2>
       <p>Thank you for using AdClip!</p>
       {isGeneratingVideos && (
-        <div className="loadingEllipsis">Generating video</div>
+        <div className={clsx('loadingEllipsis', styles.loadingText)}>
+          Generating video
+        </div>
       )}
 
       {videos.length > 1 ? (
@@ -61,6 +64,7 @@ function OutputVideos() {
                 isLoading={isGeneratingVideos}
                 source={video.url}
                 duration={totalDuration}
+                fullPath={video.fullPath}
                 name={filename}
               />
             </div>

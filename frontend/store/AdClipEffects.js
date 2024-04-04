@@ -28,6 +28,26 @@ import {getFilenameFromFullPath} from '../fetchData/cloudStorage';
 const INPUT_VIDEOS_FOLDER = 'videos/';
 
 const effects = (store) => {
+  const transcribeVideo = (callback) => {
+    const inputVideoFullPath = store.get('inputVideoFullPath');
+    const language = store.get('language');
+    callTranscribeVideo({
+      full_path: inputVideoFullPath,
+      file_name: getFilenameFromFullPath(inputVideoFullPath),
+      language_code: language,
+    })
+      .then((result) => {
+        store.set('reviewTranscripts')(result.data.transcript);
+        if (callback != null) callback();
+      })
+      .catch((error) => {
+        console.error(error);
+        store.set('transcriptionError')(error);
+      })
+      .finally(() => {
+        store.set('isTranscribingVideo')(false);
+      });
+  };
   store.on('selectedFilesForUpload').subscribe((files) => {
     for (const file of files) {
       const storageRef = ref(getStorage(), INPUT_VIDEOS_FOLDER + file.name);
@@ -41,21 +61,7 @@ const effects = (store) => {
 
   store.on('isTranscribingVideo').subscribe((isTranscribingVideo) => {
     if (isTranscribingVideo) {
-      const inputVideoFullPath = store.get('inputVideoFullPath');
-      const language = store.get('language');
-      callTranscribeVideo({
-        full_path: inputVideoFullPath,
-        file_name: getFilenameFromFullPath(inputVideoFullPath),
-        language_code: language,
-      })
-        .then((result) => {
-          store.set('isTranscribingVideo')(false);
-          store.set('reviewTranscripts')(result.data.transcript);
-        })
-        .catch((error) => {
-          console.error(error);
-          store.set('transcriptionError')(error);
-        });
+      transcribeVideo();
     }
   });
 
@@ -70,7 +76,7 @@ const effects = (store) => {
   });
 
   store.on('isSummarizingTranscript').subscribe((isSummarizingTranscript) => {
-    if (isSummarizingTranscript) {
+    const summarizeTranscript = () => {
       const inputVideoFullPath = store.get('inputVideoFullPath');
       const transcripts = store.get('reviewTranscripts');
       const language = store.get('language');
@@ -97,11 +103,19 @@ const effects = (store) => {
         .finally(() => {
           store.set('isSummarizingTranscript')(false);
         });
+    };
+    if (isSummarizingTranscript) {
+      const transcripts = store.get('reviewTranscripts');
+      if (transcripts.length === 0) {
+        transcribeVideo(summarizeTranscript);
+      } else {
+        summarizeTranscript();
+      }
     }
   });
 
   store.on('isTranscribingByTopic').subscribe((isTranscribingByTopic) => {
-    if (isTranscribingByTopic) {
+    const transcribeByTopic = () => {
       const inputVideoFullPath = store.get('inputVideoFullPath');
       const transcripts = store.get('reviewTranscripts');
       callTranscribeByTopic({
@@ -124,6 +138,14 @@ const effects = (store) => {
         .finally(() => {
           store.set('isTranscribingByTopic')(false);
         });
+    };
+    if (isTranscribingByTopic) {
+      const transcripts = store.get('reviewTranscripts');
+      if (transcripts.length === 0) {
+        transcribeVideo(transcribeByTopic);
+      } else {
+        transcribeByTopic();
+      }
     }
   });
 

@@ -40,6 +40,25 @@
 
   &.withCheckbox
     grid-template-columns: 3rem 3rem 3rem 1fr
+  &.inTimestampEdit
+    grid-template-columns: 3.5rem 3.5rem 1fr
+  &.withClipButtons
+    grid-template-columns: 3rem 3rem 3rem 1fr
+    &.inTimestampEdit
+      grid-template-columns: 6rem 3.5rem 3.5rem 1fr
+
+.clipButtonsContainer
+  display: flex
+  gap: 0.5rem
+
+.clipButton
+  display: flex
+  align-items: center
+  height: 23px
+  background-color: white
+  border-color: $primaryColor
+  border-width: 1px
+  color: $primaryColor
 
 .checkbox
   cursor: pointer

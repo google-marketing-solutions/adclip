@@ -21,6 +21,8 @@ import styles from './TranscriptRow.module.sass';
 import Input from './Input';
 import clsx from 'clsx';
 
+import 'material-symbols';
+
 function TranscriptText({index, isHighlighted = false, transcript}) {
   const store = Store.useStore();
   const [content, setContent] = useState(transcript);
@@ -107,7 +109,11 @@ function TranscriptRow({
   playerRef,
   transcriptKey,
   transcript,
+  withClipButtons = false,
 }) {
+  const store = Store.useStore();
+  const areTimestampsInEdit = store.get('areTimestampsInEdit');
+
   if (isLoading) {
     return (
       <div className={clsx(styles.wrapper, styles.transcriptRow)}>
@@ -118,15 +124,49 @@ function TranscriptRow({
     );
   }
 
+  const playClip = () => {
+    const startTime = store.get(transcriptKey)[index]['startTime'];
+    playerRef.current.seek(startTime);
+    playerRef.current.play();
+  };
+
+  const deleteClip = () => {
+    const updatedTranscripts = store
+      .get(transcriptKey)
+      .filter((_, transcriptIdx) => transcriptIdx !== index);
+    store.set('summarizedTranscripts')(updatedTranscripts);
+  };
+
+  const shouldDisableDelete = store.get(transcriptKey).length === 1;
   return (
     <div
       className={clsx(
         styles.transcriptRow,
         canKeepTranscripts && styles.withCheckbox,
+        withClipButtons && styles.withClipButtons,
+        areTimestampsInEdit && styles.inTimestampEdit,
       )}>
       {canKeepTranscripts && (
-        <KeepTranscriptCheckbox transcript={transcript.text} index={index}
-        transcriptKey={transcriptKey} />
+        <KeepTranscriptCheckbox
+          transcript={transcript.text}
+          index={index}
+          transcriptKey={transcriptKey}
+        />
+      )}
+      {withClipButtons && (
+        <div className={styles.clipButtonsContainer}>
+          <button className={styles.clipButton} onClick={playClip}>
+            <span className="material-symbols-rounded">play_arrow</span>
+          </button>
+          {areTimestampsInEdit && (
+            <button
+              className={styles.clipButton}
+              onClick={deleteClip}
+              disabled={shouldDisableDelete}>
+              <span className="material-symbols-rounded">delete</span>
+            </button>
+          )}
+        </div>
       )}
       <TimestampButton
         index={index}

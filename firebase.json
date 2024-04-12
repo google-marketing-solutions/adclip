@@ -12,6 +12,52 @@
         ".git",
         "firebase-debug.log",
         "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "python3 -m venv functions/transcribe_video/venv",
+        "source functions/transcribe_video/venv/bin/activate && python3 -m pip install -r functions/transcribe_video/requirements.txt"
+      ]
+    },
+    {
+      "source": "functions/summarize_video",
+      "codebase": "summarize-video",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "python3 -m venv functions/summarize_video/venv",
+        "source functions/summarize_video/venv/bin/activate && python3 -m pip install -r functions/summarize_video/requirements.txt"
+      ]
+    },
+    {
+      "source": "functions/summarize_video_by_topics",
+      "codebase": "summarize-video-by-topics",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "python3 -m venv functions/summarize_video_by_topics/venv",
+        "source functions/summarize_video_by_topics/venv/bin/activate && python3 -m pip install -r functions/summarize_video_by_topics/requirements.txt"
+      ]
+    },
+    {
+      "source": "functions/cut_video",
+      "codebase": "cut-video",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "python3 -m venv functions/cut_video/venv",
+        "source functions/cut_video/venv/bin/activate && python3 -m pip install -r functions/cut_video/requirements.txt"
       ]
     }
   ],

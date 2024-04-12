@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Undux subscribiptions. Most http requests would be called here.
+ */
+
 import {getDownloadURL, getStorage, ref, uploadBytes} from 'firebase/storage';
 import {createFirebaseApp} from '../firebase/clientApp';
 import {
@@ -21,7 +25,6 @@ import {
   callTranscribeVideo,
   callTranscribeByTopic,
   callSummarizeTranscript,
-  callSummarizeByTopic,
 } from '../fetchData/cloudFunctions';
 import {getFilenameFromFullPath} from '../fetchData/cloudStorage';
 
@@ -48,6 +51,11 @@ const effects = (store) => {
         store.set('isTranscribingVideo')(false);
       });
   };
+
+  /**
+   * Uploads the selected videos to cloud storage.
+   * @param {!Array<!File>} files
+   */
   store.on('selectedFilesForUpload').subscribe((files) => {
     for (const file of files) {
       const storageRef = ref(getStorage(), INPUT_VIDEOS_FOLDER + file.name);
@@ -59,12 +67,19 @@ const effects = (store) => {
     }
   });
 
+  /**
+   * Transcribe video when isTranscribingVideo is true.
+   */
   store.on('isTranscribingVideo').subscribe((isTranscribingVideo) => {
     if (isTranscribingVideo) {
       transcribeVideo();
     }
   });
 
+  /**
+   * When inputVideoFullPath is provided, set the video URL.
+   * @param {!string} videoFullPath
+   */
   store.on('inputVideoFullPath').subscribe((videoFullPath) => {
     if (videoFullPath != null) {
       store.set('inputVideoURL')(null);
@@ -75,6 +90,9 @@ const effects = (store) => {
     }
   });
 
+  /**
+   * Summarize the transcript when isSummarizingTranscript is true.
+   */
   store.on('isSummarizingTranscript').subscribe((isSummarizingTranscript) => {
     const summarizeTranscript = () => {
       const inputVideoFullPath = store.get('inputVideoFullPath');
@@ -114,6 +132,9 @@ const effects = (store) => {
     }
   });
 
+  /**
+   * Transcribe the video by topics when isTranscribingByTopic is true.
+   */
   store.on('isTranscribingByTopic').subscribe((isTranscribingByTopic) => {
     const transcribeByTopic = () => {
       const inputVideoFullPath = store.get('inputVideoFullPath');
@@ -149,33 +170,39 @@ const effects = (store) => {
     }
   });
 
+  /**
+   * Deduplicate and sort the transcript lines selected by user.
+   */
   store.on('isSummarizingByTopic').subscribe((isSummarizingByTopic) => {
     if (isSummarizingByTopic) {
-      const inputVideoFullPath = store.get('inputVideoFullPath');
       const transcriptWithTopics = store.get('transcriptWithTopics');
       const filteredTranscript = [];
+      const addedLines = new Set();
       Object.keys(transcriptWithTopics).forEach((topic) => {
         Object.keys(transcriptWithTopics[topic]).forEach((lineNumber) => {
-          if (transcriptWithTopics[topic][lineNumber].checked)
+          if (
+            !addedLines.has(lineNumber) &&
+            transcriptWithTopics[topic][lineNumber].checked
+          ) {
+            addedLines.add(lineNumber);
             filteredTranscript.push(transcriptWithTopics[topic][lineNumber]);
+          }
         });
       });
-      callSummarizeByTopic({
-        filename: getFilenameFromFullPath(inputVideoFullPath),
-        transcript: filteredTranscript,
-      })
-        .then((result) => {
-          store.set('summarizedTranscripts')(result.data.summarized_transcript);
-        })
-        .catch((error) => {
-          store.set('error')(error);
-        })
-        .finally(() => {
-          store.set('isSummarizingByTopic')(false);
-        });
+
+      filteredTranscript.sort(
+        (transcript1, transcript2) =>
+          transcript1['startTime'] - transcript2['startTime'],
+      );
+
+      store.set('summarizedTranscripts')(filteredTranscript);
+      store.set('isSummarizingByTopic')(false);
     }
   });
 
+  /**
+   * Generate the output videos when isGeneratingVideos is true.
+   */
   store.on('isGeneratingVideos').subscribe((isGeneratingVideos) => {
     if (isGeneratingVideos) {
       const inputVideoFullPath = store.get('inputVideoFullPath');

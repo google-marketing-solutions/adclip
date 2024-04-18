@@ -20,6 +20,11 @@ import moviepy.editor as mpy
 from moviepy.editor import VideoFileClip
 from moviepy.video.fx.all import crop
 from google.cloud import storage
+from firebase_functions.params import (
+  StringParam,
+  ResourceInput,
+  ResourceType,
+)
 import os
 
 initialize_app()
@@ -28,9 +33,12 @@ TMP_FOLDER = '/tmp/'
 OUTPUT_FOLDER = 'output/'
 WATERMARK_API_URI = 'https://asia-southeast1-adclip.cloudfunctions.net'
 + '/watermark_gen1'
-BUCKET_ID = 'adclip.appspot.com'
+STORAGE_BUCKET = StringParam(
+  'BUCKET',
+  input=ResourceInput(type=ResourceType.STORAGE_BUCKET),
+  description='This is where all video and audio files will be stored',
+)
 storage_client = storage.Client()
-bucket = storage_client.get_bucket(BUCKET_ID)
 
 
 def add_watermark(
@@ -57,6 +65,7 @@ def add_watermark(
 
 
 def upload_blob(source_file_name: str, destination_blob_name: str) -> None:
+  bucket = storage_client.get_bucket(STORAGE_BUCKET)
   blob = bucket.blob(destination_blob_name)
   blob.upload_from_filename(source_file_name)
   print(f'File {source_file_name} uploaded to {destination_blob_name}.')

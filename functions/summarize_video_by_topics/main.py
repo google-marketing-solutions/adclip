@@ -317,7 +317,7 @@ def fix_timestamps(
 
 
 @https_fn.on_call()
-def summarize_transcript(request: https_fn.CallableRequest) -> any:
+def summarize_transcript_by_topic(request: https_fn.CallableRequest) -> any:
   """Receives input from a HTTP request and processes data.
 
   Args:

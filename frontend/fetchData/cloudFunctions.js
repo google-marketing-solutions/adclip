@@ -20,7 +20,7 @@ import {createFirebaseApp} from '../firebase/clientApp';
 const APP = createFirebaseApp();
 const CUT_VIDEO_FUNCTION = 'cut_video';
 const TRANSCRIBE_VIDEO_FUNCTION = 'transcribe_video';
-const TRANSCRIBE_BY_TOPIC_FUNCTION = 'summarize_transcript-topics-review';
+const TRANSCRIBE_BY_TOPIC_FUNCTION = 'summarize_transcript_by_topic';
 const SUMMARIZE_TRANSCRIPT_FUNCTION = 'summarize_transcript';
 const SIXTY_MINUTES_IN_MS = 3600000;
 

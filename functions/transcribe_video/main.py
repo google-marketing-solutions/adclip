@@ -21,22 +21,30 @@ from google.cloud import speech
 from google.cloud import storage
 import moviepy.editor as mpy
 from video_intelligence import process_video
+from firebase_functions.params import (
+  StringParam,
+  ResourceInput,
+  ResourceType,
+)
 
 
 initialize_app()
 
 
-GCLOUD_BUCKET_NAME = 'adclip.appspot.com'
+STORAGE_BUCKET = StringParam(
+  'BUCKET',
+  input=ResourceInput(type=ResourceType.STORAGE_BUCKET),
+  description='This is where all video and audio files will be stored',
+)
 AUDIO_FOLDER = 'videos/audio/'
 TEMP_FOLDER = '/tmp/'
-GS_PATH = f'gs://{GCLOUD_BUCKET_NAME}/'
+GS_PATH = f'gs://{STORAGE_BUCKET}/'
 GAP_MULTIPLIER = 2.5
 MIN_CLIP_DURATION = 5
 LANGUAGE_CODE = 'en-US'
 
 
 storage_client = storage.Client()
-bucket = storage_client.get_bucket(GCLOUD_BUCKET_NAME)
 
 
 def get_speech_recognition_config(language_code: str):
@@ -79,12 +87,14 @@ def does_file_exist(file_path: str) -> bool:
   Returns:
     True if file existed, otherwise, False
   """
+  bucket = storage_client.get_bucket(STORAGE_BUCKET)
   blob = bucket.get_blob(file_path)
   return blob is not None
 
 
 def upload_blob(source_file_name: str, destination_blob_name: str) -> None:
   """Upload file to bucket."""
+  bucket = storage_client.get_bucket(STORAGE_BUCKET)
   blob = bucket.blob(destination_blob_name)
   blob.upload_from_filename(source_file_name)
 
@@ -104,6 +114,7 @@ def extract_audio(video_full_path, file_name, output_name=None) -> str:
   Returns:
     A path to video audio file.
   """
+  bucket = storage_client.get_bucket(STORAGE_BUCKET)
   file_name_without_extension = file_name.rsplit('.', 1)[0]
   if output_name is None:
     audio_output_file = file_name_without_extension  + '.wav'

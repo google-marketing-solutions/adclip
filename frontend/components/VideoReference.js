@@ -66,6 +66,11 @@ const VideoReference = forwardRef(function VideoReference(
       }
       if (shouldPause) playerRef.current.pause();
     }
+    const clipEndTime = store.get('clipEndTime');
+    if (clipEndTime != null && currentTime >= clipEndTime) {
+      playerRef.current.pause();
+      store.set('clipEndTime')(null);
+    }
   };
 
   return (

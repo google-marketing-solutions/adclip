@@ -36,7 +36,7 @@ function SummaryReview() {
   const transcripts = store.get('summarizedTranscripts');
   const filename = store.get('inputVideoFilename');
   const router = useRouter();
-  const [isPreviewing, setIsPreviewing] = useState(false);
+  const isPreviewing = store.get('isPreviewing');
   const [previewCurrentTime, setPreviewCurrentTime] = useState(-1);
   const playerRef = useRef(null);
   const inputVideoFullPath = store.get('inputVideoFullPath');
@@ -84,8 +84,11 @@ function SummaryReview() {
 
   const togglePreview = () => {
     if (isPreviewing) setPreviewCurrentTime(-1);
-    else store.set('areTimestampsInEdit')(false);
-    setIsPreviewing(!isPreviewing);
+    else {
+      store.set('areTimestampsInEdit')(false);
+      store.set('clipEndTime')(null);
+    }
+    store.set('isPreviewing')(!isPreviewing);
   };
 
   const isSummarizing = isSummarizingTranscript || isSummarizingByTopic;

@@ -19,12 +19,14 @@ import effects from './AdClipEffects';
 
 const initialState = {
   areTimestampsInEdit: false,
+  clipEndTime: null,
   files: [],
   inputVideoFullPath: null,
   inputVideoURL: null,
   inputVideoFilename: null,
   isFetchingFiles: false,
   isGeneratingVideos: false,
+  isPreviewing: false,
   isSummarizingByTopic: false,
   isSummarizingTranscript: false,
   isTranscribingByTopic: false,

@@ -124,18 +124,21 @@ function TranscriptRow({
     );
   }
 
-  const playClip = () => {
+  function playClip() {
+    store.set('isPreviewing')(false);
     const startTime = store.get(transcriptKey)[index]['startTime'];
     playerRef.current.seek(startTime);
     playerRef.current.play();
-  };
 
-  const deleteClip = () => {
+    store.set('clipEndTime')(store.get(transcriptKey)[index]['endTime']);
+  }
+
+  function deleteClip() {
     const updatedTranscripts = store
       .get(transcriptKey)
       .filter((_, transcriptIdx) => transcriptIdx !== index);
     store.set('summarizedTranscripts')(updatedTranscripts);
-  };
+  }
 
   const shouldDisableDelete = store.get(transcriptKey).length === 1;
   return (

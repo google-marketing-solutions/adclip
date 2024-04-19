@@ -61,17 +61,19 @@ function SummaryReview() {
     }
   }, [inputVideoFullPath, router.isReady, router.query]);
 
-  const totalDuration = transcripts.reduce(
-    (duration, transcript) =>
-      duration + transcript.endTime - transcript.startTime,
-    0,
-  );
+  const totalDuration = transcripts.reduce((duration, transcript, index) => {
+    let newDuration = duration + transcript.endTime - transcript.startTime;
+    if (index > 0 && transcript.startTime < transcripts[index - 1].endTime) {
+      newDuration -= transcripts[index - 1].endTime - transcript.startTime;
+    }
+    return newDuration;
+  }, 0);
 
   const generateVideos = () => {
-    store.set('isGeneratingVideos')(true);
     router.push(
       '/outputVideos/' + encodeURIComponent(store.get('inputVideoFullPath')),
     );
+    store.set('isGeneratingVideos')(true);
   };
 
   const onPreviewTimeUpdate = (currentTime) => {

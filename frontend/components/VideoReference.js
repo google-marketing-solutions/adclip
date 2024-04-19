@@ -26,6 +26,7 @@ const VideoReference = forwardRef(function VideoReference(
     hasControls = true,
     isAutoplay = false,
     onTimeUpdateCallback = null,
+    preload = undefined,
     transcripts = [],
   },
   playerRef,
@@ -75,6 +76,7 @@ const VideoReference = forwardRef(function VideoReference(
         <Player
           autoPlay={isAutoplay}
           onTimeUpdate={onTimeUpdate}
+          preload={preload}
           ref={playerRef}>
           <BigPlayButton position="center" />
           <ControlBar disableCompletely={!hasControls} />

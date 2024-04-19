@@ -172,12 +172,13 @@ function SummaryReview() {
                   hasControls
                   isAutoplay
                   onTimeUpdateCallback={onPreviewTimeUpdate}
+                  preload="auto"
                   ref={playerRef}
                   transcripts={transcripts}
                 />
               </div>
             ) : (
-              <VideoReference ref={playerRef} />
+              <VideoReference preload="auto" ref={playerRef} />
             )}
           </section>
         </main>

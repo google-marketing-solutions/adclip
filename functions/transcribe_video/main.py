@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import itertools
+import os
 from firebase_admin import firestore
 from firebase_admin import initialize_app
 from firebase_functions import https_fn
@@ -21,21 +22,12 @@ from google.cloud import speech
 from google.cloud import storage
 import moviepy.editor as mpy
 from video_intelligence import process_video
-from firebase_functions.params import (
-  StringParam,
-  ResourceInput,
-  ResourceType,
-)
 
 
 initialize_app()
 
 
-STORAGE_BUCKET = StringParam(
-  'BUCKET',
-  input=ResourceInput(type=ResourceType.STORAGE_BUCKET),
-  description='This is where all video and audio files will be stored',
-)
+STORAGE_BUCKET = os.environ.get('BUCKET', 'Storage bucket is not set.')
 AUDIO_FOLDER = 'videos/audio/'
 TEMP_FOLDER = '/tmp/'
 GS_PATH = f'gs://{STORAGE_BUCKET}/'

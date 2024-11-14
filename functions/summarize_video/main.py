@@ -23,6 +23,7 @@ This function is the microservice to process the following tasks:
 
 
 from firebase_functions import https_fn
+from firebase_functions import options
 from firebase_admin import initialize_app, firestore
 from languages import Language
 from languages import DefaultLanguage
@@ -122,7 +123,11 @@ def match_with_video_shots(video_shots: list,
   return transcript
 
 
-@https_fn.on_call()
+@https_fn.on_call(
+    timeout_sec=600,
+    memory=options.MemoryOption.GB_1,
+    cpu=2,
+)
 def summarize_transcript(request: https_fn.CallableRequest) -> any:
   """Receives input from a HTTP request and processes data.
 

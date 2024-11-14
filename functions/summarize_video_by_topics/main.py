@@ -29,6 +29,7 @@ import re
 from firebase_admin import firestore
 from firebase_admin import initialize_app
 from firebase_functions import https_fn
+from firebase_functions import options
 import llm
 
 
@@ -316,7 +317,11 @@ def fix_timestamps(
   return text_sorted_by_topics
 
 
-@https_fn.on_call()
+@https_fn.on_call(
+    timeout_sec=600,
+    memory=options.MemoryOption.GB_1,
+    cpu=2,
+)
 def summarize_transcript_by_topic(request: https_fn.CallableRequest) -> any:
   """Receives input from a HTTP request and processes data.
 

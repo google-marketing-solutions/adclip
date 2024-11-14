@@ -14,8 +14,6 @@
 from firebase_functions import https_fn, options
 from firebase_admin import initialize_app
 import requests
-import google.auth.transport.requests
-import google.oauth2.id_token
 import moviepy.editor as mpy
 from moviepy.editor import VideoFileClip
 from moviepy.video.fx.all import crop
@@ -31,37 +29,12 @@ initialize_app()
 
 TMP_FOLDER = '/tmp/'
 OUTPUT_FOLDER = 'output/'
-WATERMARK_API_URI = 'https://asia-southeast1-adclip.cloudfunctions.net'
-+ '/watermark_gen1'
 STORAGE_BUCKET = StringParam(
   'BUCKET',
   input=ResourceInput(type=ResourceType.STORAGE_BUCKET),
   description='This is where all video and audio files will be stored',
 )
 storage_client = storage.Client()
-
-
-def add_watermark(
-    function_url: str,
-    full_path: str,
-    full_path_vertical: str,
-    file_name: str
-) -> None:
-  auth_req = google.auth.transport.requests.Request()
-  id_token = google.oauth2.id_token.fetch_id_token(auth_req, function_url)
-  headers = {'Authorization': f'Bearer {id_token}'}
-  response = requests.post(
-      function_url, json = {
-        'full_path': full_path,
-        'full_path_vertical': full_path_vertical,
-        'file_name': file_name
-        },
-        headers=headers
-  )
-  try:
-    response.json()
-  except:
-    print('An exception occurred')
 
 
 def upload_blob(source_file_name: str, destination_blob_name: str) -> None:
@@ -136,17 +109,10 @@ def upload_clips(
     video_output_path: str,
     video_output_path_original: str
 ) -> None:
-    upload_blob(video_output_path, f'{OUTPUT_FOLDER}vertical_tmp_{file_name}')
-    upload_blob(
-      video_output_path_original,
-      f'{OUTPUT_FOLDER}landscape_tmp_{file_name}'
-    )
-
-    add_watermark(
-      WATERMARK_API_URI,
-      f'{OUTPUT_FOLDER}landscape_tmp_{file_name}',
-      f'{OUTPUT_FOLDER}vertical_tmp_{file_name}',
-      file_name,
+  upload_blob(video_output_path, f'{OUTPUT_FOLDER}vertical_{file_name}')
+  upload_blob(
+    video_output_path_original,
+    f'{OUTPUT_FOLDER}landscape_{file_name}'
   )
 
 

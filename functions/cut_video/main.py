@@ -18,22 +18,21 @@ import moviepy.editor as mpy
 from moviepy.editor import VideoFileClip
 from moviepy.video.fx.all import crop
 from google.cloud import storage
-from firebase_functions.params import (
-  StringParam,
-  ResourceInput,
-  ResourceType,
-)
 import os
 
 initialize_app()
 
 TMP_FOLDER = '/tmp/'
 OUTPUT_FOLDER = 'output/'
+<<<<<<< Updated upstream
 STORAGE_BUCKET = StringParam(
   'BUCKET',
   input=ResourceInput(type=ResourceType.STORAGE_BUCKET),
   description='This is where all video and audio files will be stored',
 )
+=======
+STORAGE_BUCKET = os.environ.get("BUCKET", "Storage bucket is not set.")
+>>>>>>> Stashed changes
 storage_client = storage.Client()
 
 

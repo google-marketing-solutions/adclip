@@ -1,48 +1,76 @@
 # AdClip
 
+AdClip is an open-source solution that leverages Google's state-of-the-art AI to help advertisers adopt short-form creatives. With AdClip, you can automatically generate short, engaging videos from your existing long-form content.
+
+## Table of Contents
+
+- [Solution Overview](#solution-overview)
+- [Implementation](#implementation)
+- [Deployment](#deployment)
+  - [Prerequisites](#prerequisites)
+  - [Frontend Deployment](#frontend-deployment)
+  - [Backend Deployment](#backend-deployment)
+- [Contributing](#contributing)
+- [Contact](#contact)
+- [License](#license)
+- [Disclaimer](#disclaimer)
+
 ## Solution Overview
 
-AdClip leverages Google's state-of-the-art AI to help advertisers adopt short-form creatives. It uses three AI technologies:
+AdClip helps you create compelling short-form video ads by:
 
-- Generative AI to identify and trim the most important ideas from a video transcript.
-- Video Intelligence to understand the video's content and context.
-- Speech to Text to transcribe the video's audio.
+- **Identifying key moments:** Using Generative AI, AdClip analyzes your video transcripts to find the most important ideas and trims the video accordingly.
+- **Understanding video content:** It leverages the Video Intelligence API to understand the content and context of your videos.
+- **Transcribing audio:** The Speech-to-Text API is used to accurately transcribe your video's audio.
 
-AdClip uses these technologies to:
+This allows you to:
 
-- Make short-form content that is short, fun, and easy to digest.
-- Produce multiple versions of transcripts from the same videos, allowing advertisers to test different narratives for different types of campaigns.
-
-## Deployment
-
-1. Create a firebase project with your GCP: https://firebase.google.com/docs/web/setup?hl=en&authuser=0#create-project
-1. In the project settings, generate a new *web* app configuration. This will give you a set of keys and configuration settings that you will need to add to your web app.
-
-### Frontend Deployment
-
-1. Install Node: https://nodejs.org/en/download
-1. On a terminal, cd to */frontend/* folder and run `npm install`
-1. Copy and rename *.env.example* to  *.env.local*. Fill up the variables from firebase project settings
-1. Install firebase CLI: https://firebase.google.com/docs/cli#install_the_firebase_cli
-1. Run `firebase use <project_id>`. Replace <project_id> with the firebase project ID
-1. Deploy the hosting: `firebase deploy --only hosting`
-
-### Backend Deployment
-
-1. Create a cloud storage bucket: https://firebase.google.com/docs/storage/web/start#create-default-bucket
-1. Install python3.12: https://www.python.org/downloads/
-1. Deploy the functions: `firebase deploy --only functions`
-  a. If you encounter this error `Error: User code failed to load. Cannot determine backend specification`, just run the command again.
+- Quickly generate short, fun, and easy-to-digest videos for your campaigns.
+- Create multiple versions of video transcripts from the same source, enabling you to test different narratives.
 
 ## Implementation
 
-AdClip is a full-stack web application built on Google Cloud Platform (GCP). It offers a self-service UI that gives users a consistent and intuitive flow to generate short-form vertical and landscape videos from an existing long-form landscape video. To deploy AdClip, you would need access to a Google Cloud Project with the following product enabled: Vertex AI API, Firebase.
+AdClip is a full-stack web application built on the Google Cloud Platform (GCP). It provides a self-service user interface for generating short-form vertical and landscape videos from a single long-form landscape video.
+
+To deploy and use AdClip, you will need a Google Cloud Project with the following APIs enabled:
+
+- Vertex AI API
+- Firebase
+
+## Deployment
+
+### Prerequisites
+
+- A Firebase project linked to your GCP account. You can create one [here](https://firebase.google.com/docs/web/setup?hl=en&authuser=0#create-project).
+- A Cloud Storage bucket. You can create one [here](https://firebase.google.com/docs/storage/web/start#create-default-bucket).
+- [Node.js](https://nodejs.org/en/download) installed.
+- [Python 3.12](https://www.python.org/downloads/) installed.
+- The [Firebase CLI](https://firebase.google.com/docs/cli#install_the_firebase_cli) installed.
+
+### Frontend Deployment
+
+1.  Navigate to the `frontend` directory: `cd frontend`
+2.  Install the required Node.js packages: `npm install`
+3.  In your Firebase project settings, generate a new web app configuration.
+4.  Copy the `.env.example` file to a new file named `.env.local`.
+5.  Fill in the variables in `.env.local` with the configuration keys from your Firebase web app.
+6.  Set your active Firebase project: `firebase use <project_id>` (replace `<project_id>` with your Firebase project ID).
+7.  Deploy the frontend: `firebase deploy --only hosting`
+
+### Backend Deployment
+
+1.  Deploy the Cloud Functions: `firebase deploy --only functions`
+    - If you encounter an error like `Error: User code failed to load. Cannot determine backend specification`, running the command again usually resolves the issue.
+
+## Contributing
+
+We welcome contributions to AdClip! Please see our [contributing guidelines](docs/contributing.md) and [code of conduct](docs/code-of-conduct.md) for more information.
 
 ## Contact
 
-- Team: Lan Tran, Ryan Sibbaluca
-- Contributors: Quy Nguyen, Pankamol Srikaew, Maggie Ting
-- Contact: <adclip-team@google.com>
+- **Team:** Lan Tran, Ryan Sibbaluca
+- **Contributors:** Quy Nguyen, Pankamol Srikaew, Maggie Ting
+- **Contact:** <adclip-team@google.com>
 
 ## License
 
@@ -55,4 +83,3 @@ This is not an officially supported Google product. It is an open source project
 This project follows [Google's Open Source Community Guidelines](https://opensource.google/conduct/).
 
 Copyright Google LLC. All rights reserved.
-

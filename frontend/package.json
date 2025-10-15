@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "clsx": "^2.0.0",
-    "firebase": "9.23.0",
+    "firebase": "12.4.0",
     "firebase-admin": "12.0.0",
     "firebaseui-react": "^1.3.12",
     "material-symbols": "^0.17.1",
